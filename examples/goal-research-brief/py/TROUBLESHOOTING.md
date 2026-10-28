@@ -27,7 +27,7 @@ python agent.py --debug "your task"
 | 500, 502, 503 "high demand" | The provider is overloaded | Temporary. Try again, or switch to a lighter model. The code already retries a few times, so a long pause before this error is normal. |
 | It runs for a very long time | A slow or busy model, or the loop keeps going | Run with `--debug` to watch it. MAX_TURNS and TOKEN_BUDGET at the top of the file are hard limits: lower them while testing. Ctrl+C stops it. |
 | `externally-managed-environment` | Your system Python refuses global installs | Use a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`, then reinstall. |
-| "No module named ..." or "Cannot find module" | A package is missing | Activate your virtual environment, then run `pip install -r requirements.txt`. |
+| "No module named ..." or "Cannot find module" | A package is missing | You are probably in the wrong Python. Run `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`. If a .venv already exists but you renamed or moved its folder, delete it (`rm -rf .venv`) and create it again: a moved environment silently stops working. |
 | The agent gives up or loops on the same step | The model is too weak for the task, or the tools return unhelpful results | Try a stronger model. Check what the tools return with `--debug`. Give it a more specific goal. |
 
 ## See which models your key can use

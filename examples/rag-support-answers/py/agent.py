@@ -1,7 +1,7 @@
 """rag-support-answers
 Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
 
-Built with Looprig v1.7.0. Run it:
+Built with Looprig v1.7.1. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
@@ -12,7 +12,22 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-from anthropic import Anthropic
+
+def _need(pkg):
+    """A missing package is almost always the wrong Python or a stale virtual environment. Say how to fix it."""
+    return (
+        f"The '{pkg}' package is not installed for this Python:\n  {sys.executable}\n\n"
+        "Fix it with a virtual environment, in this folder:\n"
+        f"  python3 -m venv .venv && source .venv/bin/activate && pip install {pkg}\n\n"
+        "If you already have a .venv and renamed or moved its folder, it no longer works: delete it and make it again\n"
+        "(rm -rf .venv, then the command above). If your prompt shows (.venv) but this still fails, run: deactivate"
+    )
+
+
+try:
+    from anthropic import Anthropic
+except ImportError:
+    sys.exit(_need("anthropic"))
 
 # ---- settings (edit freely) ---------------------------------------------------
 PROVIDER = "anthropic"

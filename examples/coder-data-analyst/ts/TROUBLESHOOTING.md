@@ -27,7 +27,7 @@ npx tsx agent.ts --debug "your task"
 | 500, 502, 503 "high demand" | The provider is overloaded | Temporary. Try again, or switch to a lighter model. The code already retries a few times, so a long pause before this error is normal. |
 | It runs for a very long time | A slow or busy model, or the loop keeps going | Run with `--debug` to watch it. MAX_TURNS and TOKEN_BUDGET at the top of the file are hard limits: lower them while testing. Ctrl+C stops it. |
 | `ERR_MODULE_NOT_FOUND` | Packages are not installed | Run `npm install` in this folder first. |
-| "No module named ..." or "Cannot find module" | A package is missing | Run `npm install`. |
+| "No module named ..." or "Cannot find module" | A package is missing | Run `npm install` in this folder. |
 | The agent gives up or loops on the same step | The model is too weak for the task, or the tools return unhelpful results | Try a stronger model. Check what the tools return with `--debug`. Give it a more specific goal. |
 
 ## See which models your key can use

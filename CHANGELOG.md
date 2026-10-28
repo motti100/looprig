@@ -2,6 +2,11 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.7.1 (2026-10-28)
+- Clear message when a Python package is missing (wrong Python or a virtual environment that was moved or renamed), with the exact fix.
+- Gemini, Groq and other compatible providers now say they use their own OpenAI-compatible API and need no OpenAI account.
+- Troubleshooting guide covers broken virtual environments.
+
 ## 1.7.0 (2026-10-28)
 - Renamed from Loopsmith to Looprig. Saved agents, theme and blueprints made under the old name still load.
 - Example bundles, README and the download folder use the new name.
