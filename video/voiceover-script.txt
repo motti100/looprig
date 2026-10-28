@@ -1,5 +1,5 @@
-LOOPSMITH EXPLAINER: voiceover script (77 seconds, read at a relaxed pace)
-Timestamps are when each paragraph should start.
+LOOPRIG EXPLAINER v1.10: voiceover script (92 seconds, read at a relaxed pace)
+Timestamps are when each paragraph should start. Record it in one take, or one paragraph at a time.
 
 [0:00]
 Everyone is talking about AI agents. Very few people can build a good one without a week of trial and error. I built Looprig to fix that.
@@ -7,17 +7,26 @@ Everyone is talking about AI agents. Very few people can build a good one withou
 [0:07]
 Here's the secret: every agent, no matter how fancy, runs the same loop. It reasons about what to do. It acts, by calling a tool. It observes what came back. And it decides: am I done, or do I go around again? Four moves. That's it.
 
-[0:22]
-Looprig turns that loop into a builder. Pick a proven technique: ReAct, chain of thought, tree of thoughts, retrieval, reflexion, routers, or a whole team of agents. Then tune each of the four moves.
+[0:21]
+Looprig turns that loop into a builder. Pick a proven technique, from a simple tool loop to ReAct, retrieval, routers, or a whole team of agents. Then tune each of the four moves.
 
-[0:36]
-It isn't tied to one vendor. OpenAI, Gemini, Claude, Groq, Mistral, DeepSeek, or a free model running on your own laptop. If it speaks the OpenAI format, it works.
+[0:33]
+It isn't tied to one vendor. OpenAI, Gemini, Claude, Groq, Mistral, DeepSeek, or a free model on your own laptop.
 
-[0:46]
-What you get is real code: Python or TypeScript, with hard limits, retries, approval for risky tools, and a doctor command that checks your key, your model and tool calling in seconds.
+[0:42]
+Then try it, right on the page. Paste your own key; it stays in your browser. Press Run and watch every step: the loop lights up as the agent reasons, acts and observes. Attach a file or an image if the task needs one, and download whatever it builds.
 
-[0:58]
-Here's one I built in minutes: ask for the hourly weather for a zip code. It looks up the location, fetches the forecast, and writes the answer. That is the loop, running for real.
+[0:56]
+There's a Project builder too. It plans, writes files, makes precise edits, runs the tests, reads the failures and fixes them. This run on screen is illustrative. On the page it works in a safe, in-memory folder with a JavaScript sandbox. For Python and shell commands, run the generated agent on your own machine, with approval on.
 
-[1:09]
+[1:10]
+What you get is real Python or TypeScript, with hard limits, retries and approval for risky tools. A doctor command checks your key, your model and tool calling in seconds. And you can hand it files or pictures with dash-dash file and dash-dash image.
+
+[1:22]
 Looprig. Free, open source, one file, runs in your browser. Link below. Build something and tell me what you make.
+
+TIPS
+- Pause for a beat at each timestamp so the picture lands first.
+- Say "dash-dash file" slowly; viewers will see the flag on screen.
+- To add the voice: ffmpeg -i looprig-explainer.mp4 -i voice.m4a -c:v copy -c:a aac -shortest looprig-explainer-voiced.mp4
+- To burn in or attach captions: most platforms accept looprig-explainer.srt directly.

@@ -1,27 +1,31 @@
 1
-00:00:00,000 --> 00:00:06,000
+00:00:00,500 --> 00:00:06,500
 AI agents are everywhere. Building a good one still takes days.
 
 2
-00:00:07,000 --> 00:00:21,000
+00:00:07,500 --> 00:00:20,500
 Every agent runs the same loop: reason, act, observe, decide.
 
 3
-00:00:22,000 --> 00:00:35,000
-Pick a proven technique, like ReAct, RAG, tree of thought or a team of agents. Tune each move.
+00:00:21,500 --> 00:00:32,500
+Pick a proven technique, from a simple tool loop to a team of agents. Tune each move.
 
 4
-00:00:36,000 --> 00:00:45,000
-It works with any model: OpenAI, Gemini, Claude, Groq, or one running on your own machine.
+00:00:33,500 --> 00:00:41,500
+It works with any model: OpenAI, Gemini, Claude, Groq, or one on your own machine.
 
 5
-00:00:46,000 --> 00:00:57,000
-You get real Python or TypeScript, with limits, retries and a built-in checkup.
+00:00:42,500 --> 00:00:55,500
+Try it right on the page, with your own key. Watch every step, and attach files or images.
 
 6
-00:00:58,000 --> 00:01:08,000
-Run it. Here is a live weather agent built in minutes.
+00:00:56,500 --> 00:01:09,500
+The Project builder plans, writes files, runs the tests and fixes failures. Illustrative run.
 
 7
-00:01:09,000 --> 00:01:16,000
+00:01:10,500 --> 00:01:21,500
+You get real Python or TypeScript, with limits, retries, a checkup and --file and --image.
+
+8
+00:01:22,500 --> 00:01:31,500
 Looprig. Free, open source, and it runs in your browser.

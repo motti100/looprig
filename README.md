@@ -1,4 +1,4 @@
-# Looprig v1.10.0
+# Looprig v1.11.0
 
 Build any AI agent from four moves: Reason, Act, Observe, Decide. Pick a technique (ReAct, chain or tree of thought, self-consistency, agentic RAG, Reflexion, routers, supervisor teams, goal loops) or tune each move, then copy working Python or TypeScript.
 
@@ -29,6 +29,6 @@ Generated code is a starting point. Read it before giving an agent tools that wr
 
 ## When something goes wrong
 
-Every generated agent has a built-in checkup: `python agent.py --doctor` (or `npx tsx agent.ts --doctor`) tests your key, the model and a tool call one step at a time. Add `--debug` to any run to watch each model call. Give it files or pictures with `--file notes.txt` and `--image photo.png`, or drop them onto the Playground. The Project builder technique adds list, edit and run-command tools. In the Playground it works on an in-memory folder and runs JavaScript in a sandbox. Errors name the provider, the model, what the provider said and the next step. The Help tab in the app, and `TROUBLESHOOTING.md` in every bundle, list the common errors and fixes.
+Every generated agent has a built-in checkup: `python agent.py --doctor` (or `npx tsx agent.ts --doctor`) tests your key, the model and a tool call one step at a time. Add `--debug` to any run to watch each model call. Give it files or pictures with `--file notes.txt` and `--image photo.png`, or drop them onto the Playground. The Project builder technique adds list, edit and run-command tools. In the Playground it works on an in-memory folder and runs JavaScript in a sandbox, and web pages and games it writes are loaded in a preview that reports their errors back so the agent can fix them. Every technique (plan, tree of thoughts, voting, reflexion, evaluator, routers, chains, teams, goal loops) runs in the Playground; only MCP servers, Python and shell need the generated code on your computer. Errors name the provider, the model, what the provider said and the next step. The Help tab in the app, and `TROUBLESHOOTING.md` in every bundle, list the common errors and fixes.
 
 MIT licensed.
