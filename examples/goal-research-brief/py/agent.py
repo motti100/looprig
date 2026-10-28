@@ -1,7 +1,7 @@
 """goal-research-brief
 Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
 
-Built with Looprig v1.9.0. Run it:
+Built with Looprig v1.9.1. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...

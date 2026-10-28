@@ -2,7 +2,7 @@
 
 Reason: direct | Act: read_file | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with [Looprig](.) v1.9.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v1.9.1. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
