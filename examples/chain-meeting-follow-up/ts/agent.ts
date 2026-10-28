@@ -54,6 +54,11 @@ const OBS_LOG: string[] = []; // raw tool results, kept as evidence
 
 const usedTokens = () => USAGE.in + USAGE.out;
 
+/** Say what was being called, so a bare error such as a 404 is not a mystery. */
+function explain(e: any): Error {
+  return new Error("model call failed: " + (e?.message ?? e) + " [provider=" + PROVIDER + " model=" + MODEL + "]");
+}
+
 async function ask(question: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -76,7 +81,9 @@ async function chat(system: string, messages: any[], tools: any[] = [], think = 
   // Prompt caching: the system prompt and tool list are re-sent every turn, so cache them.
   const systemArg: any = [{ type: "text", text: system, cache_control: { type: "ephemeral" } }];
   const params: any = { model: MODEL, max_tokens: MAX_TOKENS, system: systemArg, messages, ...(tools.length ? { tools } : {}), ...(think ? THINK : {}) };
-  const resp: any = await client.messages.create(params);
+  const resp: any = await client.messages.create(params).catch((e: unknown) => {
+    throw explain(e);
+  });
   USAGE.in += resp.usage.input_tokens;
   USAGE.out += resp.usage.output_tokens;
   messages.push({ role: "assistant", content: resp.content });

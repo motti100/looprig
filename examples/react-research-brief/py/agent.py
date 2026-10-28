@@ -88,6 +88,15 @@ def used_tokens():
     return USAGE["in"] + USAGE["out"]
 
 
+def explain(e):
+    """Say what was being called, so a bare error such as a 404 is not a mystery."""
+    resp = getattr(e, "response", None)
+    req = getattr(resp, "request", None)
+    where = f" [{getattr(req, 'method', '')} {getattr(req, 'url', '')}]" if req is not None else ""
+    body = (getattr(resp, "text", "") or "")[:500]
+    return RuntimeError(f"model call failed: {type(e).__name__}: {e}{where} provider={PROVIDER} model={MODEL} {body}".strip())
+
+
 def trace(kind, **data):
     """Append one event to trace.jsonl so every run can be replayed and audited."""
     with open(TRACE_FILE, "a", encoding="utf-8") as f:
@@ -101,7 +110,10 @@ def chat(system, messages, tools=None, think=False):
     system_arg = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
     if think:
         kwargs.update(THINK)
-    resp = client.messages.create(model=MODEL, max_tokens=MAX_TOKENS, system=system_arg, messages=messages, **kwargs)
+    try:
+        resp = client.messages.create(model=MODEL, max_tokens=MAX_TOKENS, system=system_arg, messages=messages, **kwargs)
+    except Exception as e:
+        raise explain(e) from e
     USAGE["in"] += resp.usage.input_tokens
     USAGE["out"] += resp.usage.output_tokens
     messages.append({"role": "assistant", "content": resp.content})

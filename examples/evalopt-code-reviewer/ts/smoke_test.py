@@ -8,6 +8,7 @@ Checks that each provider you have a key for can (1) answer a plain question and
   python smoke_test.py                              # tests every provider that has a key set
   python smoke_test.py openai gemini                # only these
   python smoke_test.py openai:gpt-4o ollama:llama3.1  # pick a model with provider:model
+  python smoke_test.py gemini --list                # show the model names your key can use
 
 Exit code is 0 only if every tested provider passes.
 """
@@ -18,7 +19,7 @@ import sys
 PROVIDERS = {
     "anthropic": {"label": "Anthropic (Claude)", "sdk": "anthropic", "base_url": None, "key_env": "ANTHROPIC_API_KEY", "model": "claude-sonnet-5-5", "proper": False, "local": False},
     "openai": {"label": "OpenAI", "sdk": "openai", "base_url": None, "key_env": "OPENAI_API_KEY", "model": "gpt-5", "proper": True, "local": False},
-    "gemini": {"label": "Google Gemini", "sdk": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "key_env": "GEMINI_API_KEY", "model": "gemini-2.5-pro", "proper": False, "local": False},
+    "gemini": {"label": "Google Gemini", "sdk": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "key_env": "GEMINI_API_KEY", "model": "gemini-2.5-flash", "proper": False, "local": False},
     "groq": {"label": "Groq", "sdk": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "GROQ_API_KEY", "model": "llama-3.3-70b-versatile", "proper": False, "local": False},
     "mistral": {"label": "Mistral", "sdk": "openai", "base_url": "https://api.mistral.ai/v1", "key_env": "MISTRAL_API_KEY", "model": "mistral-large-latest", "proper": False, "local": False},
     "deepseek": {"label": "DeepSeek", "sdk": "openai", "base_url": "https://api.deepseek.com", "key_env": "DEEPSEEK_API_KEY", "model": "deepseek-chat", "proper": False, "local": False},
@@ -127,7 +128,22 @@ def test(pid, model=None):
     return problems
 
 
+def list_models(pid):
+    p = PROVIDERS[pid]
+    try:
+        client = make_client(p, os.environ.get("SMOKE_BASE_URL") if pid == "custom" else None)
+        names = sorted(getattr(m, "id", str(m)).replace("models/", "") for m in client.models.list())
+    except Exception as e:
+        print(f"{p['label']}: could not list models ({type(e).__name__}: {str(e)[:160]})")
+        return
+    print(f"{p['label']}: {len(names)} models")
+    for n in names:
+        print("  " + n)
+
+
 def main(argv):
+    show_list = "--list" in argv
+    argv = [a for a in argv if a != "--list"]
     wanted = []
     for a in argv:
         pid, _, model = a.partition(":")
@@ -143,6 +159,10 @@ def main(argv):
     if not wanted:
         print("No API keys found. Set one (for example OPENAI_API_KEY) or name a local provider such as ollama.")
         return 2
+    if show_list:
+        for pid, _model in wanted:
+            list_models(pid)
+        return 0
     failures = 0
     for pid, model in wanted:
         label = f"{PROVIDERS[pid]['label']} / {model or PROVIDERS[pid]['model']}"
