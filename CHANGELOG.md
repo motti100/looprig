@@ -2,6 +2,11 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.8.0 (2026-10-28)
+- Playground: run your agent from the page with your own key. The Reason, Act, Observe and Decide boxes light up as it works, each step streams into a console, and you can answer the agent's questions inline.
+- Run history with a side-by-side difference (tokens, tool calls, time), and send any run to the Trace tab.
+- The Test task field is shared between the builder and the Playground. Hosted copy only: the in-page preview blocks network calls.
+
 ## 1.7.1 (2026-10-28)
 - Clear message when a Python package is missing (wrong Python or a virtual environment that was moved or renamed), with the exact fix.
 - Gemini, Groq and other compatible providers now say they use their own OpenAI-compatible API and need no OpenAI account.

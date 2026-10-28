@@ -2,7 +2,7 @@
  * rag-support-answers
  * Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
  *
- * Built with Looprig v1.7.1. Run it:
+ * Built with Looprig v1.8.0. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
