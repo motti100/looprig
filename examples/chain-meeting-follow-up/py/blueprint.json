@@ -1,0 +1,67 @@
+{
+  "name": "chain-meeting-follow-up",
+  "goal": "Turn raw meeting notes into decisions, action items with owners, and a short recap email.",
+  "task": "Notes: we agreed to ship v2 on the 14th. Priya owns the migration. Tom to confirm pricing by Friday.",
+  "provider": "anthropic",
+  "model": "claude-sonnet-5-5",
+  "customModel": "",
+  "customBaseUrl": "",
+  "customKeyEnv": "API_KEY",
+  "topology": "chain",
+  "run": "once",
+  "reason": {
+    "cot": false,
+    "react": false,
+    "plan": false,
+    "tot": false,
+    "sc": false,
+    "think": false
+  },
+  "tools": [],
+  "approval": "risky",
+  "observe": "raw",
+  "decide": {
+    "ground": false,
+    "reflect": false,
+    "evaluate": false,
+    "human": false
+  },
+  "limits": {
+    "maxTurns": 10,
+    "maxTokens": 4096,
+    "tokenBudget": 200000
+  },
+  "outputSchema": "",
+  "prod": {
+    "cache": true,
+    "trace": true,
+    "ptools": true
+  },
+  "o": {
+    "totBranches": 3,
+    "totDepth": 2,
+    "scSamples": 3,
+    "thinkBudget": 4000,
+    "compressAt": 1500,
+    "reflectRounds": 2,
+    "evalRounds": 3,
+    "threshold": 8,
+    "rubric": "Accurate, complete, clear, and follows the goal. No unsupported claims.",
+    "iterations": 8,
+    "docsDir": "docs",
+    "topK": 4,
+    "mcp": "",
+    "routes": "billing | Invoices, charges, refunds and payment problems\ntechnical | Bugs, errors, setup and how-to questions\ngeneral | Anything else, including account questions",
+    "steps": "Extract | Pull out the key facts, names, dates and numbers | Output contains concrete facts, no opinions\nAnalyze | Identify patterns, risks and open questions from the facts\nWrite | Write a clear, structured summary for a busy reader",
+    "workerMode": "sectioning",
+    "workers": "Optimist | Make the strongest case in favor and list the upside\nSkeptic | Look for risks, holes and counter-evidence\nPragmatist | Focus on cost, effort and what to do first",
+    "voters": 3,
+    "maxWorkers": 4,
+    "team": "researcher | Finds facts and sources, and reports what it found\nwriter | Turns research into clear, well-structured prose\nreviewer | Checks the draft for errors and gaps, and says what to fix",
+    "maxRounds": 6
+  },
+  "system": "You are Chain Meeting Follow Up, an AI agent.\n\nGoal: Turn raw meeting notes into decisions, action items with owners, and a short recap email.\n\nAnswer from your own knowledge and reasoning. If you are missing information, say what is missing.\n\nRules:\n- Be accurate. If you are unsure, say so instead of guessing.\n- Keep answers concise and well structured.\n- Never take an irreversible action unless the user asked for it.",
+  "preset": "chain",
+  "format": "loopsmith-blueprint",
+  "version": 1
+}

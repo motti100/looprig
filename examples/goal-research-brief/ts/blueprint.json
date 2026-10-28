@@ -1,0 +1,71 @@
+{
+  "name": "goal-research-brief",
+  "goal": "Research a topic on the web and write a short, sourced brief with key findings and open questions.",
+  "task": "What are the main trade-offs between SQLite and Postgres for a small SaaS product?",
+  "provider": "anthropic",
+  "model": "claude-sonnet-5-5",
+  "customModel": "",
+  "customBaseUrl": "",
+  "customKeyEnv": "API_KEY",
+  "topology": "single",
+  "run": "goal",
+  "reason": {
+    "cot": false,
+    "react": false,
+    "plan": true,
+    "tot": false,
+    "sc": false,
+    "think": false
+  },
+  "tools": [
+    "read_file",
+    "write_file",
+    "run_python"
+  ],
+  "approval": "risky",
+  "observe": "log",
+  "decide": {
+    "ground": false,
+    "reflect": false,
+    "evaluate": false,
+    "human": false
+  },
+  "limits": {
+    "maxTurns": 10,
+    "maxTokens": 4096,
+    "tokenBudget": 300000
+  },
+  "outputSchema": "",
+  "prod": {
+    "cache": true,
+    "trace": true,
+    "ptools": true
+  },
+  "o": {
+    "totBranches": 3,
+    "totDepth": 2,
+    "scSamples": 3,
+    "thinkBudget": 4000,
+    "compressAt": 1500,
+    "reflectRounds": 2,
+    "evalRounds": 3,
+    "threshold": 8,
+    "rubric": "Accurate, complete, clear, and follows the goal. No unsupported claims.",
+    "iterations": 8,
+    "docsDir": "docs",
+    "topK": 4,
+    "mcp": "",
+    "routes": "billing | Invoices, charges, refunds and payment problems\ntechnical | Bugs, errors, setup and how-to questions\ngeneral | Anything else, including account questions",
+    "steps": "Extract | Pull out the key facts, names, dates and numbers | Output contains concrete facts, no opinions\nAnalyze | Identify patterns, risks and open questions from the facts\nWrite | Write a clear, structured summary for a busy reader",
+    "workerMode": "sectioning",
+    "workers": "Optimist | Make the strongest case in favor and list the upside\nSkeptic | Look for risks, holes and counter-evidence\nPragmatist | Focus on cost, effort and what to do first",
+    "voters": 3,
+    "maxWorkers": 4,
+    "team": "researcher | Finds facts and sources, and reports what it found\nwriter | Turns research into clear, well-structured prose\nreviewer | Checks the draft for errors and gaps, and says what to fix",
+    "maxRounds": 6
+  },
+  "system": "You are Goal Research Brief, an AI agent.\n\nGoal: Research a topic on the web and write a short, sourced brief with key findings and open questions.\n\nYou work in a loop: decide what is needed, call a tool when it helps, read the result, and continue until you can answer. Tools: read_file, write_file, run_python. Use a tool only when it moves the task forward, and read each result before continuing.\n\nYou run in rounds. Your notes are saved in progress.md between rounds. Make real progress each round, and call finish only when the goal is fully met.\n\nRules:\n- Be accurate. If you are unsure, say so instead of guessing.\n- Keep answers concise and well structured.\n- Never take an irreversible action unless the user asked for it.",
+  "preset": "goal",
+  "format": "loopsmith-blueprint",
+  "version": 1
+}

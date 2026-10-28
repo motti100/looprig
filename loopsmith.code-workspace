@@ -1,0 +1,53 @@
+{
+	"folders": [
+		{
+			"name": "WODIt",
+			"path": "../WODIt"
+		},
+		{
+			"name": "HomeMaintenanceApp",
+			"path": "../HomeMaintenanceApp"
+		},
+		{
+			"name": "screenashot",
+			"path": "../Projects/screenashot"
+		},
+		{
+			"name": "apex",
+			"path": "../apex"
+		},
+		{
+			"name": "Apex-trading-app",
+			"path": "../Apex-trading-app"
+		},
+		{
+			"name": "ChefMeThat",
+			"path": "../ChefMeThat"
+		},
+		{
+			"name": "smart-answering-service",
+			"path": "../smart-answering-service"
+		},
+		{
+			"path": "../Tovali"
+		},
+		{
+			"path": "../Plan to 3D"
+		},
+		{
+			"path": "../shalom-hebrew"
+		},
+		{
+			"path": "../Cognite"
+		},
+		{
+			"path": "../MaintainItLanding"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Plan to 3D"
+	}
+}

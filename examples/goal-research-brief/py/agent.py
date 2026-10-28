@@ -1,0 +1,309 @@
+"""goal-research-brief
+Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
+
+Built with Loopsmith. Run it:
+
+    pip install anthropic
+    export ANTHROPIC_API_KEY=...
+    python agent.py "your task here"
+"""
+import json
+import os
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
+
+from anthropic import Anthropic
+
+# ---- settings (edit freely) ---------------------------------------------------
+PROVIDER = "anthropic"
+MODEL = "claude-sonnet-5-5"
+MAX_TOKENS = 4096  # per model call
+MAX_TURNS = 10  # tool-loop turns per pass through the loop
+TOKEN_BUDGET = 300000  # hard stop for the whole run
+APPROVAL = "risky"  # "none" | "risky" | "all": ask before running tools
+RISKY = {"write_file", "run_python", "my_custom_tool"}
+OBS_LIMIT = 6000  # max characters of one tool result the model sees
+MAX_RETRIES = 5  # the SDK retries rate limits, 5xx errors and timeouts with backoff
+TIMEOUT = 120  # seconds to wait for one model call
+THINK = {}  # model-native extended thinking, if enabled
+TRACE_FILE = "trace.jsonl"  # one JSON line per reason / act / observe event
+
+client = Anthropic(max_retries=MAX_RETRIES, timeout=TIMEOUT)  # reads ANTHROPIC_API_KEY from the environment
+
+SYSTEM = """You are Goal Research Brief, an AI agent.
+
+Goal: Research a topic on the web and write a short, sourced brief with key findings and open questions.
+
+You work in a loop: decide what is needed, call a tool when it helps, read the result, and continue until you can answer. Tools: read_file, write_file, run_python. Use a tool only when it moves the task forward, and read each result before continuing.
+
+You run in rounds. Your notes are saved in progress.md between rounds. Make real progress each round, and call finish only when the goal is fully met.
+
+Rules:
+- Be accurate. If you are unsure, say so instead of guessing.
+- Keep answers concise and well structured.
+- Never take an irreversible action unless the user asked for it."""
+REASON_RULES = ""
+PLANNER = "You are a planner. Output a short numbered plan and nothing else."
+LOG_FILE = "observations.log"
+
+# ---- ACT: tools ---------------------------------------------------------------
+TOOLS = [
+    {
+        "name": "read_file",
+        "description": "Read a text file from the working directory.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "path"
+            ]
+        }
+    },
+    {
+        "name": "write_file",
+        "description": "Write text to a file in the working directory, replacing its contents.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "path",
+                "content"
+            ]
+        }
+    },
+    {
+        "name": "run_python",
+        "description": "Run a short Python 3 script and return what it prints (stdout and stderr). Use print() to show results.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "code"
+            ]
+        }
+    },
+    {
+        "name": "finish",
+        "description": "Call this only when the goal is fully met. Pass a summary of the outcome.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "summary": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "summary"
+            ]
+        }
+    }
+]
+
+def _safe_path(p):
+    full = os.path.abspath(p)
+    if not full.startswith(os.getcwd()):
+        raise ValueError("path is outside the working directory")
+    return full
+
+
+def tool_read_file(args):
+    with open(_safe_path(args["path"]), encoding="utf-8") as f:
+        return f.read()[:20000]
+
+
+def tool_write_file(args):
+    path = os.path.abspath(args["path"])
+    if not path.startswith(os.getcwd()):
+        raise ValueError("path is outside the working directory")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(args["content"])
+    return f"wrote {len(args['content'])} characters to {args['path']}"
+
+
+def tool_run_python(args):
+    # Runs on YOUR machine. Keep approval on, or move this into a sandbox/container.
+    r = subprocess.run([sys.executable, "-c", args["code"]], capture_output=True, text=True, timeout=30)
+    return (r.stdout + r.stderr)[-6000:]
+
+IMPLS = {
+    "read_file": tool_read_file,
+    "write_file": tool_write_file,
+    "run_python": tool_run_python,
+}
+
+
+# ---- provider adapter: the only code that knows which API is underneath -------------
+USAGE = {"in": 0, "out": 0}
+FINISHED = {"flag": False, "summary": ""}
+OBS_LOG = []  # raw tool results, kept as evidence
+
+
+def used_tokens():
+    return USAGE["in"] + USAGE["out"]
+
+
+def trace(kind, **data):
+    """Append one event to trace.jsonl so every run can be replayed and audited."""
+    with open(TRACE_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps({"kind": kind, "tokens": used_tokens(), **data}, default=str) + "\n")
+
+
+def chat(system, messages, tools=None, think=False):
+    """One model call. Appends the assistant turn to `messages` and returns a neutral reply."""
+    kwargs = {"tools": tools} if tools else {}
+    # Prompt caching: the system prompt and tool list are re-sent every turn, so cache them.
+    system_arg = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
+    if think:
+        kwargs.update(THINK)
+    resp = client.messages.create(model=MODEL, max_tokens=MAX_TOKENS, system=system_arg, messages=messages, **kwargs)
+    USAGE["in"] += resp.usage.input_tokens
+    USAGE["out"] += resp.usage.output_tokens
+    messages.append({"role": "assistant", "content": resp.content})
+    return {
+        "text": "".join(b.text for b in resp.content if b.type == "text"),
+        "calls": [{"id": b.id, "name": b.name, "args": b.input} for b in resp.content if b.type == "tool_use"],
+        "paused": resp.stop_reason == "pause_turn",  # a server-side tool (web search) needs another pass
+    }
+
+
+def add_results(messages, calls, outputs):
+    blocks = [{"type": "tool_result", "tool_use_id": c["id"], "content": o} for c, o in zip(calls, outputs)]
+    messages.append({"role": "user", "content": blocks})
+
+
+def llm(system, prompt):
+    """One plain model call with no tools. Used for planning, critique and voting."""
+    return chat(system, [{"role": "user", "content": prompt}])["text"]
+
+
+def parse_json(text):
+    spans = sorted((text.find(o), c) for o, c in (("[", "]"), ("{", "}")) if o in text)
+    for start, close in spans:
+        try:
+            return json.loads(text[start : text.rfind(close) + 1])
+        except json.JSONDecodeError:
+            continue
+    raise ValueError("no JSON found in: " + text[:200])
+
+
+def call_tool(name, args):
+    fn = IMPLS.get(name)
+    if fn is None:
+        return f"error: unknown tool {name}"
+    risky = name in RISKY
+    if APPROVAL == "all" or (APPROVAL == "risky" and risky):
+        if input(f"\n  approve {name}({json.dumps(args)[:200]})? [y/N] ").strip().lower() != "y":
+            return "error: the user declined this action"
+    try:
+        return str(fn(args))
+    except Exception as e:  # tool errors go back to the model so it can adjust
+        return f"error: {e}"
+
+
+# ---- OBSERVE ----------------------------------------------------------------------
+def observe(name, text, task):
+    """Decide what the model gets to see after a tool runs."""
+    OBS_LOG.append(f"[{name}] {text[:4000]}")
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(f"## {name}\n{text}\n\n")
+    return text[:OBS_LIMIT]
+
+
+# ---- the loop: REASON -> ACT -> OBSERVE -> DECIDE whether to go round again ---------
+def agent_loop(task, system=SYSTEM, history=None, tools=None):
+    tools = TOOLS if tools is None else tools
+    messages = history if history is not None else []
+    messages.append({"role": "user", "content": task})
+    for turn in range(1, MAX_TURNS + 1):
+        if used_tokens() > TOKEN_BUDGET:
+            return "[stopped: token budget reached]"
+        reply = chat(system, messages, tools, think=True)  # REASON
+        if reply["text"].strip():
+            print(f"[reason {turn}] {reply['text'].strip()[:300]}")
+            trace("reason", turn=turn, text=reply["text"].strip()[:2000])
+        if reply["paused"]:
+            continue
+        calls = reply["calls"]
+        if not calls:  # DECIDE: no more actions requested, so the model is done
+            return reply["text"]
+        for c in calls:
+            if c["name"] == "finish":
+                FINISHED.update(flag=True, summary=c["args"].get("summary", ""))
+                return FINISHED["summary"]
+
+        def run_call(c):
+            print(f"[act {turn}] {c['name']}({json.dumps(c['args'])[:120]})")  # ACT
+            trace("act", turn=turn, tool=c["name"], input=c["args"])
+            raw = call_tool(c["name"], c["args"])
+            seen = observe(c["name"], raw, task)  # OBSERVE
+            trace("observe", turn=turn, tool=c["name"], chars=len(raw), shown=len(seen))
+            return seen
+
+        if len(calls) > 1 and APPROVAL == "none":  # independent calls in one turn run at the same time
+            with ThreadPoolExecutor(max_workers=len(calls)) as pool:
+                outputs = list(pool.map(run_call, calls))
+        else:
+            outputs = [run_call(c) for c in calls]
+        add_results(messages, calls, outputs)  # results go back in for the next REASON step
+    return "[stopped: MAX_TURNS reached]"
+
+
+# ---- REASON: plan first --------------------------------------------------------------
+def make_plan(task):
+    return llm(PLANNER, f"Task: {task}\n\nWrite a 3-6 step plan. Say which tool each step needs, if any.")
+
+
+def think_and_act(task, system=SYSTEM, history=None):
+    """REASON -> ACT -> OBSERVE for one agent: shape the thinking, then run the tool loop."""
+    task += "\n\nPlan to follow:\n" + make_plan(task)
+    out = agent_loop(task, system=system + REASON_RULES, history=history)
+    return out
+
+
+# ---- shape: how the loop is wired into agents --------------------------------------
+def topology(task, history=None):
+    return think_and_act(task, history=history)
+
+
+PROGRESS = "progress.md"
+MAX_ITERATIONS = 8
+
+
+def run(task):
+    """Goal loop: every iteration starts fresh and reads its notes from disk, until `finish` or a cap."""
+    for i in range(1, MAX_ITERATIONS + 1):
+        notes = open(PROGRESS, encoding="utf-8").read() if os.path.exists(PROGRESS) else "(nothing yet)"
+        prompt = (
+            f"GOAL:\n{task}\n\nPROGRESS NOTES:\n{notes}\n\n"
+            f"Do the next most useful chunk of work. Rewrite {PROGRESS} with write_file, keeping earlier notes and adding what you just did. "
+            "Call finish with a summary only when the goal is fully met."
+        )
+        print(f"\n=== iteration {i}/{MAX_ITERATIONS} ===")
+        topology(prompt)
+        if FINISHED["flag"]:
+            return FINISHED["summary"]
+        if used_tokens() > TOKEN_BUDGET:
+            return "[stopped: token budget reached]"
+    return "[stopped: iteration limit]"
+
+
+if __name__ == "__main__":
+    task = " ".join(sys.argv[1:]) or "What are the main trade-offs between SQLite and Postgres for a small SaaS product?"
+    print("\n" + run(task))
+    print(f"\n[tokens used: {used_tokens()}]")
