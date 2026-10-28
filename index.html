@@ -503,7 +503,7 @@ const MODELS = [
 const PROVIDERS = {
   anthropic: { label: 'Anthropic (Claude)', sdk: 'anthropic', keyEnv: 'ANTHROPIC_API_KEY', models: MODELS.map((m) => m.id) },
   openai: { label: 'OpenAI', sdk: 'openai', baseUrl: null, keyEnv: 'OPENAI_API_KEY', proper: true, models: ['gpt-5', 'gpt-5-mini', 'gpt-4.1', 'gpt-4o', 'gpt-4o-mini', 'o4-mini'] },
-  gemini: { label: 'Google Gemini', sdk: 'openai', baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/', keyEnv: 'GEMINI_API_KEY', models: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'] },
+  gemini: { label: 'Google Gemini', sdk: 'openai', baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/', keyEnv: 'GEMINI_API_KEY', models: ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-pro-latest', 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'] },
   groq: { label: 'Groq', sdk: 'openai', baseUrl: 'https://api.groq.com/openai/v1', keyEnv: 'GROQ_API_KEY', models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'] },
   mistral: { label: 'Mistral', sdk: 'openai', baseUrl: 'https://api.mistral.ai/v1', keyEnv: 'MISTRAL_API_KEY', models: ['mistral-large-latest', 'mistral-small-latest'] },
   deepseek: { label: 'DeepSeek', sdk: 'openai', baseUrl: 'https://api.deepseek.com', keyEnv: 'DEEPSEEK_API_KEY', models: ['deepseek-chat', 'deepseek-reasoner'] },

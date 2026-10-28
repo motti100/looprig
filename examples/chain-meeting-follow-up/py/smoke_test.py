@@ -19,7 +19,7 @@ import sys
 PROVIDERS = {
     "anthropic": {"label": "Anthropic (Claude)", "sdk": "anthropic", "base_url": None, "key_env": "ANTHROPIC_API_KEY", "model": "claude-sonnet-5-5", "proper": False, "local": False},
     "openai": {"label": "OpenAI", "sdk": "openai", "base_url": None, "key_env": "OPENAI_API_KEY", "model": "gpt-5", "proper": True, "local": False},
-    "gemini": {"label": "Google Gemini", "sdk": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "key_env": "GEMINI_API_KEY", "model": "gemini-2.5-flash", "proper": False, "local": False},
+    "gemini": {"label": "Google Gemini", "sdk": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "key_env": "GEMINI_API_KEY", "model": "gemini-flash-latest", "proper": False, "local": False},
     "groq": {"label": "Groq", "sdk": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "GROQ_API_KEY", "model": "llama-3.3-70b-versatile", "proper": False, "local": False},
     "mistral": {"label": "Mistral", "sdk": "openai", "base_url": "https://api.mistral.ai/v1", "key_env": "MISTRAL_API_KEY", "model": "mistral-large-latest", "proper": False, "local": False},
     "deepseek": {"label": "DeepSeek", "sdk": "openai", "base_url": "https://api.deepseek.com", "key_env": "DEEPSEEK_API_KEY", "model": "deepseek-chat", "proper": False, "local": False},
