@@ -18,7 +18,7 @@ from openai import OpenAI
 
 # ---- settings (edit freely) ---------------------------------------------------
 PROVIDER = "gemini"
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-3.5-flash-lite"
 # Any OpenAI-compatible server works: change BASE_URL, KEY_ENV and MODEL.
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 KEY_ENV = "GEMINI_API_KEY"  # environment variable that holds the API key
@@ -160,11 +160,11 @@ def chat(system, messages, tools=None, think=False):
             args = json.loads(c.function.arguments or "{}")
         except json.JSONDecodeError:
             args = {}
-        calls.append({"id": c.id or f"call_{i}", "name": c.function.name, "args": args})
+        calls.append({"id": c.id or f"call_{i}", "name": c.function.name, "args": args, "extra": getattr(c, "extra_content", None)})
     entry = {"role": "assistant", "content": msg.content or ""}
     if calls:
         entry["tool_calls"] = [
-            {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["args"])}} for c in calls
+            {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["args"])}, **({"extra_content": c["extra"]} if c.get("extra") else {})} for c in calls
         ]
     messages.append(entry)
     return {"text": msg.content or "", "calls": calls, "paused": False}
