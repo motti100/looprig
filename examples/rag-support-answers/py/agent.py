@@ -1,7 +1,7 @@
 """rag-support-answers
 Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
 
-Built with Loopsmith. Run it:
+Built with Loopsmith v1.6.0. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
@@ -102,13 +102,34 @@ def used_tokens():
     return USAGE["in"] + USAGE["out"]
 
 
+KEY_NAME = "ANTHROPIC_API_KEY"
+DEBUG = "--debug" in sys.argv or bool(os.environ.get("AGENT_DEBUG"))  # python agent.py --debug "task"
+
+
+def hint(e):
+    """Turn a provider error into one plain-English next step."""
+    code = getattr(e, "status_code", None) or getattr(getattr(e, "response", None), "status_code", None)
+    text = str(e).lower()
+    if code in (401, 403) or "api key" in text or "unauthor" in text:
+        return f"The provider rejected your key. Check that {KEY_NAME} holds a real, active key (no extra spaces) and was exported in THIS terminal. Run: python agent.py --doctor"
+    if code == 404 or "no longer available" in text or "not found" in text:
+        return f"The provider does not know the model '{MODEL}' (renamed, retired or not on your plan). Edit MODEL at the top of this file. Run: python agent.py --doctor"
+    if code == 429 or "quota" in text or "rate" in text:
+        return "Rate limit or quota hit. Wait a minute, lower MAX_TURNS, or check your plan and billing."
+    if code in (500, 502, 503, 504) or "timeout" in type(e).__name__.lower() or "connection" in type(e).__name__.lower():
+        return "The provider is busy, slow or unreachable. It is usually temporary: try again, or switch MODEL to a lighter one."
+    if code == 400:
+        return "The provider refused the request itself. The text above says which field. Run with --debug to see each call, or run --doctor to test the model on its own."
+    return "Run: python agent.py --doctor  (tests your key, model and tool calling one step at a time)"
+
+
 def explain(e):
-    """Say what was being called, so a bare error such as a 404 is not a mystery."""
+    """Say what was being called and what to do next, so a bare error is never a mystery."""
     resp = getattr(e, "response", None)
     req = getattr(resp, "request", None)
     where = f" [{getattr(req, 'method', '')} {getattr(req, 'url', '')}]" if req is not None else ""
-    body = (getattr(resp, "text", "") or "")[:500]
-    return RuntimeError(f"model call failed: {type(e).__name__}: {e}{where} provider={PROVIDER} model={MODEL} {body}".strip())
+    body = (getattr(resp, "text", "") or "")[:600]
+    return RuntimeError(f"model call failed: {type(e).__name__}: {e}{where}\n  provider={PROVIDER} model={MODEL}\n  provider said: {body or '(nothing)'}\n  next step: {hint(e)}")
 
 
 def trace(kind, **data):
@@ -170,6 +191,46 @@ def call_tool(name, args):
         return str(fn(args))
     except Exception as e:  # tool errors go back to the model so it can adjust
         return f"error: {e}"
+
+
+_raw_chat = chat
+
+
+def chat(system, messages, tools=None, think=False):
+    if DEBUG:
+        print(f"[debug] -> {PROVIDER}/{MODEL} messages={len(messages)} tools={[t['name'] for t in tools or []]}")
+    out = _raw_chat(system, messages, tools, think)
+    if DEBUG:
+        print(f"[debug] <- text={len(out['text'])} chars, tool calls={[c['name'] for c in out['calls']]}, tokens so far={used_tokens()}")
+    return out
+
+
+def doctor():
+    """python agent.py --doctor : test the key, the model and a tool-call round trip, one step at a time."""
+    print(f"provider : {PROVIDER}\nmodel    : {MODEL}")
+    key = os.environ.get(KEY_NAME, "")
+    shown = f"{key[:4]}...{key[-2:]} ({len(key)} chars)" if len(key) > 8 else ("(too short to be a real key)" if key else "NOT SET")
+    print(f"key      : {KEY_NAME} = {shown}")
+    echo = [{"name": "echo", "description": "Echo text back.", "input_schema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}}]
+    try:
+        r = _raw_chat("Reply briefly.", [{"role": "user", "content": "Say hi."}])
+        print(f"[ok]   1. plain call works: {r['text'].strip()[:60]!r}")
+    except Exception as e:
+        print(f"[FAIL] 1. plain call: {e}")
+        return 1
+    try:
+        msgs = [{"role": "user", "content": "Call the echo tool with text 'ping', then say done."}]
+        r = _raw_chat("Use the tools you are given.", msgs, echo)
+        if not r["calls"]:
+            print("[warn] 2. this model did not call the tool. The agent may struggle: try a stronger MODEL.")
+            return 0
+        add_results(msgs, r["calls"], ["pong"])
+        r = _raw_chat("Use the tools you are given.", msgs, echo)
+        print("[ok]   2. tool call and follow-up work. Your agent should run.")
+    except Exception as e:
+        print(f"[FAIL] 2. tool-call round trip: {e}")
+        return 1
+    return 0
 
 
 # ---- OBSERVE ----------------------------------------------------------------------
@@ -257,6 +318,13 @@ def run(task):
 
 
 if __name__ == "__main__":
-    task = " ".join(sys.argv[1:]) or "A customer asks how to change the email address on their account."
-    print("\n" + run(task))
+    if "--doctor" in sys.argv:
+        sys.exit(doctor())
+    task = " ".join(a for a in sys.argv[1:] if a != "--debug") or "A customer asks how to change the email address on their account."
+    try:
+        print("\n" + run(task))
+    except RuntimeError as e:
+        if DEBUG:
+            raise
+        sys.exit(f"\nERROR: {e}")
     print(f"\n[tokens used: {used_tokens()}]")

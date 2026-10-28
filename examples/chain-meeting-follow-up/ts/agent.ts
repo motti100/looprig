@@ -2,7 +2,7 @@
  * chain-meeting-follow-up
  * Reason: direct | Act: no tools | Observe: raw | Decide: stop when done | Shape: prompt chain
  *
- * Built with Loopsmith. Run it:
+ * Built with Loopsmith v1.6.0. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
@@ -54,9 +54,30 @@ const OBS_LOG: string[] = []; // raw tool results, kept as evidence
 
 const usedTokens = () => USAGE.in + USAGE.out;
 
-/** Say what was being called, so a bare error such as a 404 is not a mystery. */
+const KEY_NAME = "ANTHROPIC_API_KEY";
+const DEBUG = process.argv.includes("--debug") || !!process.env.AGENT_DEBUG; // npx tsx agent.ts --debug "task"
+
+/** Turn a provider error into one plain-English next step. */
+function hint(e: any): string {
+  const code = e?.status ?? e?.response?.status;
+  const text = String(e?.message ?? e).toLowerCase();
+  if (code === 401 || code === 403 || text.includes("api key")) return "The provider rejected your key. Check that " + KEY_NAME + " holds a real, active key and was exported in THIS terminal. Run: npx tsx agent.ts --doctor";
+  if (code === 404 || text.includes("no longer available")) return "The provider does not know the model '" + MODEL + "' (renamed, retired or not on your plan). Edit MODEL at the top of this file. Run: npx tsx agent.ts --doctor";
+  if (code === 429 || text.includes("quota")) return "Rate limit or quota hit. Wait a minute, lower MAX_TURNS, or check your plan and billing.";
+  if ([500, 502, 503, 504].includes(code) || text.includes("timed out") || text.includes("connection")) return "The provider is busy, slow or unreachable. It is usually temporary: try again, or switch MODEL to a lighter one.";
+  if (code === 400) return "The provider refused the request itself. The text above says which field. Run with --debug, or run --doctor to test the model on its own.";
+  return "Run: npx tsx agent.ts --doctor  (tests your key, model and tool calling one step at a time)";
+}
+
+/** Say what was being called and what to do next, so a bare error is never a mystery. */
 function explain(e: any): Error {
-  return new Error("model call failed: " + (e?.message ?? e) + " [provider=" + PROVIDER + " model=" + MODEL + "]");
+  let body = "";
+  try {
+    body = JSON.stringify(e?.error ?? "").slice(0, 600);
+  } catch {
+    /* ignore */
+  }
+  return new Error("model call failed: " + (e?.message ?? e) + "\n  provider=" + PROVIDER + " model=" + MODEL + "\n  provider said: " + (body || "(nothing)") + "\n  next step: " + hint(e));
 }
 
 async function ask(question: string): Promise<string> {
@@ -73,11 +94,11 @@ function trace(kind: string, data: Record<string, unknown> = {}) {
   fs.appendFileSync(TRACE_FILE, JSON.stringify({ kind, tokens: usedTokens(), ...data }) + "\n");
 }
 
-type Call = { id: string; name: string; args: any };
+type Call = { id: string; name: string; args: any; extra?: any };
 type Reply = { text: string; calls: Call[]; paused: boolean };
 
 /** One model call. Appends the assistant turn to `messages` and returns a neutral reply. */
-async function chat(system: string, messages: any[], tools: any[] = [], think = false): Promise<Reply> {
+async function rawChat(system: string, messages: any[], tools: any[] = [], think = false): Promise<Reply> {
   // Prompt caching: the system prompt and tool list are re-sent every turn, so cache them.
   const systemArg: any = [{ type: "text", text: system, cache_control: { type: "ephemeral" } }];
   const params: any = { model: MODEL, max_tokens: MAX_TOKENS, system: systemArg, messages, ...(tools.length ? { tools } : {}), ...(think ? THINK : {}) };
@@ -176,6 +197,43 @@ async function agentLoop(task: string, system = SYSTEM, history: any[] = [], too
   return "[stopped: MAX_TURNS reached]";
 }
 
+async function chat(system: string, messages: any[], tools: any[] = [], think = false): Promise<Reply> {
+  if (DEBUG) console.log("[debug] -> " + PROVIDER + "/" + MODEL + " messages=" + messages.length + " tools=" + JSON.stringify(tools.map((t) => t.name)));
+  const out = await rawChat(system, messages, tools, think);
+  if (DEBUG) console.log("[debug] <- text=" + out.text.length + " chars, tool calls=" + JSON.stringify(out.calls.map((c) => c.name)) + ", tokens so far=" + usedTokens());
+  return out;
+}
+
+/** npx tsx agent.ts --doctor : test the key, the model and a tool-call round trip, one step at a time. */
+async function doctor(): Promise<number> {
+  console.log("provider : " + PROVIDER + "\nmodel    : " + MODEL);
+  const key = process.env[KEY_NAME] ?? "";
+  console.log("key      : " + KEY_NAME + " = " + (key.length > 8 ? key.slice(0, 4) + "..." + key.slice(-2) + " (" + key.length + " chars)" : key ? "(too short to be a real key)" : "NOT SET"));
+  const echo = [{ name: "echo", description: "Echo text back.", input_schema: { type: "object", properties: { text: { type: "string" } }, required: ["text"] } }];
+  try {
+    const r = await rawChat("Reply briefly.", [{ role: "user", content: "Say hi." }]);
+    console.log("[ok]   1. plain call works: " + JSON.stringify(r.text.trim().slice(0, 60)));
+  } catch (e) {
+    console.log("[FAIL] 1. plain call: " + (e as Error).message);
+    return 1;
+  }
+  try {
+    const msgs: any[] = [{ role: "user", content: "Call the echo tool with text 'ping', then say done." }];
+    let r = await rawChat("Use the tools you are given.", msgs, echo);
+    if (!r.calls.length) {
+      console.log("[warn] 2. this model did not call the tool. The agent may struggle: try a stronger MODEL.");
+      return 0;
+    }
+    addResults(msgs, r.calls, ["pong"]);
+    r = await rawChat("Use the tools you are given.", msgs, echo);
+    console.log("[ok]   2. tool call and follow-up work. Your agent should run.");
+  } catch (e) {
+    console.log("[FAIL] 2. tool-call round trip: " + (e as Error).message);
+    return 1;
+  }
+  return 0;
+}
+
 
 /** REASON -> ACT -> OBSERVE for one agent: shape the thinking, then run the tool loop. */
 async function thinkAndAct(task: string, system = SYSTEM, history?: any[]): Promise<string> {
@@ -245,14 +303,19 @@ const control = {
 export { run, usedTokens, control };
 
 if ((process.argv[1] ?? "").endsWith("agent.ts")) {
-  const task = process.argv.slice(2).join(" ") || "Notes: we agreed to ship v2 on the 14th. Priya owns the migration. Tom to confirm pricing by Friday.";
-  run(task)
-    .then((out) => {
-      console.log("\n" + out);
-      console.log("\n[tokens used: " + usedTokens() + "]");
-    })
-    .catch((e) => {
-      console.error(e);
-      process.exitCode = 1;
-    });
+  if (process.argv.includes("--doctor")) {
+    doctor().then((code) => process.exit(code));
+  } else {
+    const task = process.argv.slice(2).filter((a) => a !== "--debug").join(" ") || "Notes: we agreed to ship v2 on the 14th. Priya owns the migration. Tom to confirm pricing by Friday.";
+    run(task)
+      .then((out) => {
+        console.log("\n" + out);
+        console.log("\n[tokens used: " + usedTokens() + "]");
+      })
+      .catch((e) => {
+        if (DEBUG) console.error(e);
+        else console.error("\nERROR: " + (e?.message ?? e));
+        process.exitCode = 1;
+      });
+  }
 }

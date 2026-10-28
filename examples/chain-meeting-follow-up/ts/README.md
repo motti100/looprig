@@ -2,7 +2,7 @@
 
 Reason: direct | Act: no tools | Observe: raw | Decide: stop when done | Shape: prompt chain
 
-Built with [Loopsmith](.). Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Loopsmith](.) v1.6.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -17,6 +17,7 @@ npx tsx agent.ts "Notes: we agreed to ship v2 on the 14th. Priya owns the migrat
 - `agent.ts`: the agent. Settings are at the top of the file.
 - `evals.ts`: a small regression suite. Add cases as you find failures.
 - `smoke_test.py`: checks that your provider keys can do tool calling.
+- `TROUBLESHOOTING.md`: what each error means and how to fix it. Start with `npx tsx agent.ts --doctor`.
 - `blueprint.json`: load it back into Loopsmith to change the design.
 - `server.ts`, `Dockerfile`, `.env.example`, `package.json`: run it as an HTTP service.
 
