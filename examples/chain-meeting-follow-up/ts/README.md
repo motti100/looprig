@@ -2,7 +2,7 @@
 
 Reason: direct | Act: no tools | Observe: raw | Decide: stop when done | Shape: prompt chain
 
-Built with [Looprig](.) v1.8.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v1.9.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -11,6 +11,8 @@ npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
 export ANTHROPIC_API_KEY="..."
 npx tsx agent.ts "Notes: we agreed to ship v2 on the 14th. Priya owns the migration. Tom to confirm pricing by Friday."
 ```
+
+Give it files or pictures: `npx tsx agent.ts "your task" --file notes.txt --image photo.png`
 
 ## What is in this folder
 

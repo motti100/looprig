@@ -2,7 +2,7 @@
 
 Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
 
-Built with [Looprig](.) v1.8.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v1.9.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -11,6 +11,8 @@ npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
 export ANTHROPIC_API_KEY="..."
 npx tsx agent.ts "What are the main trade-offs between SQLite and Postgres for a small SaaS product?"
 ```
+
+Give it files or pictures: `npx tsx agent.ts "your task" --file notes.txt --image photo.png`
 
 ## What is in this folder
 

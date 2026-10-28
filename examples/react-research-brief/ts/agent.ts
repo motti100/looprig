@@ -2,7 +2,7 @@
  * react-research-brief
  * Reason: ReAct | Act: web_search, fetch_url | Observe: raw | Decide: stop when done | Shape: single agent
  *
- * Built with Looprig v1.8.0. Run it:
+ * Built with Looprig v1.9.0. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
@@ -84,6 +84,59 @@ const usedTokens = () => USAGE.in + USAGE.out;
 
 const KEY_NAME = "ANTHROPIC_API_KEY";
 const DEBUG = process.argv.includes("--debug") || !!process.env.AGENT_DEBUG; // npx tsx agent.ts --debug "task"
+
+// ---- attachments: npx tsx agent.ts "your task" --file notes.txt --image photo.png ----
+// Text files are pasted into the task. Images (and PDFs, where the provider reads them) go in as real attachments.
+const ATTACH: { kind: "image" | "pdf"; mime: string; b64: string }[] = [];
+const FILE_LIMIT = 60000; // characters of a text file kept in the prompt
+const IMG_TYPES: Record<string, string> = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp" };
+
+function failNow(msg: string): never {
+  console.error("ERROR: " + msg);
+  process.exit(1);
+}
+
+/** Split argv into the task words and text-file blocks. Images are collected in ATTACH. */
+function loadAttachments(argv: string[]): { task: string; texts: string[] } {
+  const words: string[] = [];
+  const texts: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--debug") continue;
+    if (a !== "--file" && a !== "--image") {
+      words.push(a);
+      continue;
+    }
+    const p = argv[++i];
+    if (!p) failNow(`${a} needs a path, like: ${a} notes.txt`);
+    if (!fs.existsSync(p) || !fs.statSync(p).isFile()) failNow(`cannot find ${p} (looking in ${process.cwd()}). Check the path and run again.`);
+    const name = p.split(/[\\/]/).pop() as string;
+    const ext = name.includes(".") ? (name.split(".").pop() as string).toLowerCase() : "";
+    const data = fs.readFileSync(p);
+    if (a === "--image" || IMG_TYPES[ext]) {
+      if (!IMG_TYPES[ext]) failNow(`${name} is not an image type I can send (use png, jpg, gif or webp).`);
+      if (data.length > 15_000_000) failNow(`${name} is over 15 MB. Make it smaller and try again.`);
+      ATTACH.push({ kind: "image", mime: IMG_TYPES[ext], b64: data.toString("base64") });
+    } else if (ext === "pdf") {
+      ATTACH.push({ kind: "pdf", mime: "application/pdf", b64: data.toString("base64") });
+    } else {
+      const text = data.toString("utf8");
+      if (text.slice(0, 2000).includes("\u0000")) failNow(`${name} looks like a binary file. --file reads text; use --image for pictures.`);
+      const note = text.length > FILE_LIMIT ? `\n[truncated: only the first ${FILE_LIMIT} characters are included]` : "";
+      texts.push(`--- file: ${name} ---\n${text.slice(0, FILE_LIMIT)}${note}\n--- end of ${name} ---`);
+    }
+  }
+  return { task: words.join(" "), texts };
+}
+
+/** The first user message: plain text, or the attachments followed by the text. */
+function userContent(text: string): any {
+  if (!ATTACH.length) return text;
+  const blocks: any[] = ATTACH.map((a) => {
+    return { type: a.kind === "image" ? "image" : "document", source: { type: "base64", media_type: a.mime, data: a.b64 } };
+  });
+  return [...blocks, { type: "text", text }];
+}
 
 /** Turn a provider error into one plain-English next step. */
 function hint(e: any): string {
@@ -191,7 +244,7 @@ async function observe(name: string, text: string, task: string): Promise<string
 
 // ---- the loop: REASON -> ACT -> OBSERVE -> DECIDE whether to go round again ---------
 async function agentLoop(task: string, system = SYSTEM, history: any[] = [], tools: any[] = TOOLS): Promise<string> {
-  history.push({ role: "user", content: task });
+  history.push({ role: "user", content: userContent(task) });
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
     if (usedTokens() > TOKEN_BUDGET) return "[stopped: token budget reached]";
     const reply = await chat(system, history, tools, true); // REASON
@@ -314,7 +367,9 @@ if ((process.argv[1] ?? "").endsWith("agent.ts")) {
   if (process.argv.includes("--doctor")) {
     doctor().then((code) => process.exit(code));
   } else {
-    const task = process.argv.slice(2).filter((a) => a !== "--debug").join(" ") || "What are the main trade-offs between SQLite and Postgres for a small SaaS product?";
+    const parsed = loadAttachments(process.argv.slice(2));
+    let task = parsed.task || "What are the main trade-offs between SQLite and Postgres for a small SaaS product?";
+    if (parsed.texts.length) task += "\n\n" + parsed.texts.join("\n\n");
     run(task)
       .then((out) => {
         console.log("\n" + out);

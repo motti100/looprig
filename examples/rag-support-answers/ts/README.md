@@ -2,7 +2,7 @@
 
 Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
 
-Built with [Looprig](.) v1.8.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v1.9.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -11,6 +11,8 @@ npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
 export ANTHROPIC_API_KEY="..."
 npx tsx agent.ts "A customer asks how to change the email address on their account."
 ```
+
+Give it files or pictures: `npx tsx agent.ts "your task" --file notes.txt --image photo.png`
 
 ## What is in this folder
 

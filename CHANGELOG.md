@@ -2,6 +2,11 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.9.0 (2026-10-28)
+- Attachments. In the Playground, attach files and images with a button, drag and drop, or paste; large pictures are resized for you.
+- Generated agents accept --file (text, code, CSV, JSON; PDF on Claude) and --image (png, jpg, gif, webp) in Python and TypeScript.
+- Help and README explain attachments and the errors you may see.
+
 ## 1.8.0 (2026-10-28)
 - Playground: run your agent from the page with your own key. The Reason, Act, Observe and Decide boxes light up as it works, each step streams into a console, and you can answer the agent's questions inline.
 - Run history with a side-by-side difference (tokens, tool calls, time), and send any run to the Trace tab.

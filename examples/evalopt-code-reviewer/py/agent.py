@@ -1,7 +1,7 @@
 """evalopt-code-reviewer
 Reason: direct | Act: read_file | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with Looprig v1.8.0. Run it:
+Built with Looprig v1.9.0. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
@@ -108,6 +108,65 @@ def used_tokens():
 
 KEY_NAME = "ANTHROPIC_API_KEY"
 DEBUG = "--debug" in sys.argv or bool(os.environ.get("AGENT_DEBUG"))  # python agent.py --debug "task"
+
+# ---- attachments: python agent.py "your task" --file notes.txt --image photo.png ------
+# Text files are pasted into the task. Images (and PDFs, where the provider reads them) go in as real attachments.
+ATTACH = []
+FILE_LIMIT = 60000  # characters of a text file kept in the prompt
+_IMG = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp"}
+
+
+def load_attachments(argv):
+    """Split argv into (task words, text-file blocks). Images are collected in ATTACH."""
+    import base64
+    words, texts, i = [], [], 0
+    while i < len(argv):
+        a = argv[i]
+        if a == "--debug":
+            i += 1
+            continue
+        if a not in ("--file", "--image"):
+            words.append(a)
+            i += 1
+            continue
+        if i + 1 >= len(argv):
+            sys.exit(f"ERROR: {a} needs a path, like: {a} notes.txt")
+        path = argv[i + 1]
+        i += 2
+        if not os.path.isfile(path):
+            sys.exit(f"ERROR: cannot find {path} (looking in {os.getcwd()}). Check the path and run again.")
+        ext = os.path.splitext(path)[1].lower()
+        name = os.path.basename(path)
+        with open(path, "rb") as f:
+            data = f.read()
+        if a == "--image" or ext in _IMG:
+            if ext not in _IMG:
+                sys.exit(f"ERROR: {name} is not an image type I can send (use png, jpg, gif or webp).")
+            if len(data) > 15_000_000:
+                sys.exit(f"ERROR: {name} is over 15 MB. Make it smaller and try again.")
+            ATTACH.append({"kind": "image", "mime": _IMG[ext], "b64": base64.b64encode(data).decode(), "name": name})
+        elif ext == ".pdf":
+            ATTACH.append({"kind": "pdf", "mime": "application/pdf", "b64": base64.b64encode(data).decode(), "name": name})
+        else:
+            text = data.decode("utf-8", errors="replace")
+            if "\x00" in text[:2000]:
+                sys.exit(f"ERROR: {name} looks like a binary file. --file reads text; use --image for pictures.")
+            note = f"\n[truncated: only the first {FILE_LIMIT} characters are included]" if len(text) > FILE_LIMIT else ""
+            texts.append(f"--- file: {name} ---\n{text[:FILE_LIMIT]}{note}\n--- end of {name} ---")
+    return " ".join(words), texts
+
+
+def user_content(text):
+    """The first user message: plain text, or the attachments followed by the text."""
+    if not ATTACH:
+        return text
+    blocks = []
+    for a in ATTACH:
+        if a["kind"] == "image":
+            blocks.append({"type": "image", "source": {"type": "base64", "media_type": a["mime"], "data": a["b64"]}})
+        else:
+            blocks.append({"type": "document", "source": {"type": "base64", "media_type": a["mime"], "data": a["b64"]}})
+    return blocks + [{"type": "text", "text": text}]
 
 
 def hint(e):
@@ -248,7 +307,7 @@ def observe(name, text, task):
 def agent_loop(task, system=SYSTEM, history=None, tools=None):
     tools = TOOLS if tools is None else tools
     messages = history if history is not None else []
-    messages.append({"role": "user", "content": task})
+    messages.append({"role": "user", "content": user_content(task)})
     for turn in range(1, MAX_TURNS + 1):
         if used_tokens() > TOKEN_BUDGET:
             return "[stopped: token budget reached]"
@@ -322,7 +381,10 @@ def run(task):
 if __name__ == "__main__":
     if "--doctor" in sys.argv:
         sys.exit(doctor())
-    task = " ".join(a for a in sys.argv[1:] if a != "--debug") or "Review app.py and list the three most serious problems."
+    task, file_texts = load_attachments(sys.argv[1:])
+    task = task or "Review app.py and list the three most serious problems."
+    if file_texts:
+        task += "\n\n" + "\n\n".join(file_texts)
     try:
         print("\n" + run(task))
     except RuntimeError as e:

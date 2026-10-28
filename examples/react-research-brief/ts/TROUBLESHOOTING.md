@@ -15,6 +15,16 @@ For a failing real run, add `--debug` to print every model call and what came ba
 npx tsx agent.ts --debug "your task"
 ```
 
+## Give it a file or an image
+
+```
+npx tsx agent.ts "Review this code" --file app.py
+npx tsx agent.ts "What is wrong in this screenshot?" --image error.png
+npx tsx agent.ts "Summarize" --file notes.txt --file data.csv --image chart.png
+```
+
+`--file` pastes a text file (code, notes, CSV, JSON; the first 60,000 characters) into the task. `--image` sends a png, jpg, gif or webp picture; the model must support images. PDFs also work with `--file report.pdf`. Repeat a flag to attach more than one file.
+
 ## Common errors
 
 | You see | What it means | What to do |
@@ -28,6 +38,8 @@ npx tsx agent.ts --debug "your task"
 | It runs for a very long time | A slow or busy model, or the loop keeps going | Run with `--debug` to watch it. MAX_TURNS and TOKEN_BUDGET at the top of the file are hard limits: lower them while testing. Ctrl+C stops it. |
 | `ERR_MODULE_NOT_FOUND` | Packages are not installed | Run `npm install` in this folder first. |
 | "No module named ..." or "Cannot find module" | A package is missing | Run `npm install` in this folder. |
+| `cannot find ...` after `--file` or `--image` | The path is wrong from where you ran the command | Use the full path, or `cd` into the folder that holds the file first. |
+| 400 after `--image` | The model does not accept pictures | Pick a vision model, for example a current Claude, Gemini or GPT-4o class model, or a local one like llava. |
 | The agent gives up or loops on the same step | The model is too weak for the task, or the tools return unhelpful results | Try a stronger model. Check what the tools return with `--debug`. Give it a more specific goal. |
 
 ## See which models your key can use

@@ -2,7 +2,7 @@
 
 Reason: direct | Act: read_file | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with [Looprig](.) v1.8.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v1.9.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -11,6 +11,8 @@ pip install anthropic
 export ANTHROPIC_API_KEY="..."
 python agent.py "Review app.py and list the three most serious problems."
 ```
+
+Give it files or pictures: `python agent.py "your task" --file notes.txt --image photo.png`
 
 ## What is in this folder
 
