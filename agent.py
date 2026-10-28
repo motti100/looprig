@@ -1,11 +1,10 @@
 """weather-agent
-Reason: ReAct | Act: web_search, fetch_url, ask_human | Observe: raw | Decide: stop when done | Shape: single agent
+Reason: ReAct | Act: fetch_url, ask_human | Observe: raw | Decide: stop when done | Shape: single agent
 
-Built with Loopsmith. Run it:
+Built with Loopsmith v1.6.0. Run it:
 
     pip install openai
     export GEMINI_API_KEY=...
-    export TAVILY_API_KEY=...   # for the web_search tool
     python agent.py "your task here"
 """
 import json
@@ -32,13 +31,15 @@ MAX_RETRIES = 5  # the SDK retries rate limits, 5xx errors and timeouts with bac
 TIMEOUT = 120  # seconds to wait for one model call
 TRACE_FILE = "trace.jsonl"  # one JSON line per reason / act / observe event
 
+if not os.environ.get(KEY_ENV):
+    sys.exit(f'Set {KEY_ENV} first, for example: export {KEY_ENV}="your-key"')
 client = OpenAI(base_url=BASE_URL, api_key=os.environ.get(KEY_ENV, "not-needed"), max_retries=MAX_RETRIES, timeout=TIMEOUT)
 
 SYSTEM = """You are Weather Agent, an AI agent.
 
 Goal: You are a weather assistant. Given a US zip code, do two steps. First, fetch https://api.zippopotam.us/us/ZIPCODE to get the latitude and longitude. Second, fetch https://api.open-meteo.com/v1/forecast?latitude=LAT&longitude=LON&hourly=temperature_2m,precipitation_probability,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&forecast_hours=24&timezone=auto. Then reply with a short hour-by-hour table (time, temperature in °F, chance of rain, wind in mph) and a one-line summary of the day.
 
-You work in a loop: decide what is needed, call a tool when it helps, read the result, and continue until you can answer. Tools: web_search, fetch_url, ask_human. Use a tool only when it moves the task forward, and read each result before continuing.
+You work in a loop: decide what is needed, call a tool when it helps, read the result, and continue until you can answer. Tools: fetch_url, ask_human. Use a tool only when it moves the task forward, and read each result before continuing.
 
 Rules:
 - Be accurate. If you are unsure, say so instead of guessing.
@@ -49,21 +50,6 @@ REASON_RULES = "\n\nWork in a Reason, Act, Observe loop. Before every tool call 
 
 # ---- ACT: tools ---------------------------------------------------------------
 TOOLS = [
-    {
-        "name": "web_search",
-        "description": "Search the web and return the top results with titles, URLs and short snippets.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "query"
-            ]
-        }
-    },
     {
         "name": "fetch_url",
         "description": "Fetch a web page by URL and return its text content (truncated).",
@@ -97,16 +83,6 @@ TOOLS = [
     }
 ]
 
-def tool_web_search(args):
-    # Tavily (https://tavily.com) has a free tier. Swap in Brave, SerpAPI or Bing the same way.
-    body = json.dumps({"query": args["query"], "max_results": 5}).encode()
-    headers = {"Content-Type": "application/json", "Authorization": "Bearer " + os.environ["TAVILY_API_KEY"]}
-    req = urllib.request.Request("https://api.tavily.com/search", data=body, headers=headers)
-    with urllib.request.urlopen(req, timeout=20) as r:
-        data = json.load(r)
-    return "\n\n".join(f"{x['title']}\n{x['url']}\n{x['content']}" for x in data.get("results", [])) or "no results"
-
-
 def tool_fetch_url(args):
     req = urllib.request.Request(args["url"], headers={"User-Agent": "agent/1.0"})
     with urllib.request.urlopen(req, timeout=20) as r:
@@ -117,7 +93,6 @@ def tool_ask_human(args):
     return input("\n[agent asks] " + args["question"] + "\n> ")
 
 IMPLS = {
-    "web_search": tool_web_search,
     "fetch_url": tool_fetch_url,
     "ask_human": tool_ask_human,
 }
@@ -131,6 +106,36 @@ OBS_LOG = []  # raw tool results, kept as evidence
 
 def used_tokens():
     return USAGE["in"] + USAGE["out"]
+
+
+KEY_NAME = "GEMINI_API_KEY"
+DEBUG = "--debug" in sys.argv or bool(os.environ.get("AGENT_DEBUG"))  # python agent.py --debug "task"
+
+
+def hint(e):
+    """Turn a provider error into one plain-English next step."""
+    code = getattr(e, "status_code", None) or getattr(getattr(e, "response", None), "status_code", None)
+    text = str(e).lower()
+    if code in (401, 403) or "api key" in text or "unauthor" in text:
+        return f"The provider rejected your key. Check that {KEY_NAME} holds a real, active key (no extra spaces) and was exported in THIS terminal. Run: python agent.py --doctor"
+    if code == 404 or "no longer available" in text or "not found" in text:
+        return f"The provider does not know the model '{MODEL}' (renamed, retired or not on your plan). Edit MODEL at the top of this file. Run: python agent.py --doctor"
+    if code == 429 or "quota" in text or "rate" in text:
+        return "Rate limit or quota hit. Wait a minute, lower MAX_TURNS, or check your plan and billing."
+    if code in (500, 502, 503, 504) or "timeout" in type(e).__name__.lower() or "connection" in type(e).__name__.lower():
+        return "The provider is busy, slow or unreachable. It is usually temporary: try again, or switch MODEL to a lighter one."
+    if code == 400:
+        return "The provider refused the request itself. The text above says which field. Run with --debug to see each call, or run --doctor to test the model on its own."
+    return "Run: python agent.py --doctor  (tests your key, model and tool calling one step at a time)"
+
+
+def explain(e):
+    """Say what was being called and what to do next, so a bare error is never a mystery."""
+    resp = getattr(e, "response", None)
+    req = getattr(resp, "request", None)
+    where = f" [{getattr(req, 'method', '')} {getattr(req, 'url', '')}]" if req is not None else ""
+    body = (getattr(resp, "text", "") or "")[:600]
+    return RuntimeError(f"model call failed: {type(e).__name__}: {e}{where}\n  provider={PROVIDER} model={MODEL}\n  provider said: {body or '(nothing)'}\n  next step: {hint(e)}")
 
 
 def trace(kind, **data):
@@ -147,9 +152,12 @@ def chat(system, messages, tools=None, think=False):
             {"type": "function", "function": {"name": t["name"], "description": t["description"], "parameters": t["input_schema"]}}
             for t in tools
         ]
-    resp = client.chat.completions.create(
-        model=MODEL, max_tokens=MAX_TOKENS, messages=[{"role": "system", "content": system}] + messages, **kwargs
-    )
+    try:
+        resp = client.chat.completions.create(
+            model=MODEL, max_tokens=MAX_TOKENS, messages=[{"role": "system", "content": system}] + messages, **kwargs
+        )
+    except Exception as e:
+        raise explain(e) from e
     if resp.usage:
         USAGE["in"] += resp.usage.prompt_tokens
         USAGE["out"] += resp.usage.completion_tokens
@@ -160,11 +168,13 @@ def chat(system, messages, tools=None, think=False):
             args = json.loads(c.function.arguments or "{}")
         except json.JSONDecodeError:
             args = {}
+        # Gemini 3 returns a thought signature on each tool call and requires it echoed back.
         calls.append({"id": c.id or f"call_{i}", "name": c.function.name, "args": args, "extra": getattr(c, "extra_content", None)})
     entry = {"role": "assistant", "content": msg.content or ""}
     if calls:
         entry["tool_calls"] = [
-            {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["args"])}, **({"extra_content": c["extra"]} if c.get("extra") else {})} for c in calls
+            {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["args"])},
+             **({"extra_content": c["extra"]} if c.get("extra") else {})} for c in calls
         ]
     messages.append(entry)
     return {"text": msg.content or "", "calls": calls, "paused": False}
@@ -202,6 +212,47 @@ def call_tool(name, args):
         return str(fn(args))
     except Exception as e:  # tool errors go back to the model so it can adjust
         return f"error: {e}"
+
+
+_raw_chat = chat
+
+
+def chat(system, messages, tools=None, think=False):
+    if DEBUG:
+        print(f"[debug] -> {PROVIDER}/{MODEL} messages={len(messages)} tools={[t['name'] for t in tools or []]}")
+    out = _raw_chat(system, messages, tools, think)
+    if DEBUG:
+        print(f"[debug] <- text={len(out['text'])} chars, tool calls={[c['name'] for c in out['calls']]}, tokens so far={used_tokens()}")
+    return out
+
+
+def doctor():
+    """python agent.py --doctor : test the key, the model and a tool-call round trip, one step at a time."""
+    print(f"provider : {PROVIDER}\nmodel    : {MODEL}")
+    print(f"endpoint : {BASE_URL}")
+    key = os.environ.get(KEY_NAME, "")
+    shown = f"{key[:4]}...{key[-2:]} ({len(key)} chars)" if len(key) > 8 else ("(too short to be a real key)" if key else "NOT SET")
+    print(f"key      : {KEY_NAME} = {shown}")
+    echo = [{"name": "echo", "description": "Echo text back.", "input_schema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}}]
+    try:
+        r = _raw_chat("Reply briefly.", [{"role": "user", "content": "Say hi."}])
+        print(f"[ok]   1. plain call works: {r['text'].strip()[:60]!r}")
+    except Exception as e:
+        print(f"[FAIL] 1. plain call: {e}")
+        return 1
+    try:
+        msgs = [{"role": "user", "content": "Call the echo tool with text 'ping', then say done."}]
+        r = _raw_chat("Use the tools you are given.", msgs, echo)
+        if not r["calls"]:
+            print("[warn] 2. this model did not call the tool. The agent may struggle: try a stronger MODEL.")
+            return 0
+        add_results(msgs, r["calls"], ["pong"])
+        r = _raw_chat("Use the tools you are given.", msgs, echo)
+        print("[ok]   2. tool call and follow-up work. Your agent should run.")
+    except Exception as e:
+        print(f"[FAIL] 2. tool-call round trip: {e}")
+        return 1
+    return 0
 
 
 # ---- OBSERVE ----------------------------------------------------------------------
@@ -267,6 +318,13 @@ def run(task):
 
 
 if __name__ == "__main__":
-    task = " ".join(sys.argv[1:]) or "Hourly weather for 02763"
-    print("\n" + run(task))
+    if "--doctor" in sys.argv:
+        sys.exit(doctor())
+    task = " ".join(a for a in sys.argv[1:] if a != "--debug") or "Hourly weather for 02763"
+    try:
+        print("\n" + run(task))
+    except RuntimeError as e:
+        if DEBUG:
+            raise
+        sys.exit(f"\nERROR: {e}")
     print(f"\n[tokens used: {used_tokens()}]")

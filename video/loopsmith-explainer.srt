@@ -1,0 +1,27 @@
+1
+00:00:00,000 --> 00:00:06,000
+AI agents are everywhere. Building a good one still takes days.
+
+2
+00:00:07,000 --> 00:00:21,000
+Every agent runs the same loop: reason, act, observe, decide.
+
+3
+00:00:22,000 --> 00:00:35,000
+Pick a proven technique, like ReAct, RAG, tree of thought or a team of agents. Tune each move.
+
+4
+00:00:36,000 --> 00:00:45,000
+It works with any model: OpenAI, Gemini, Claude, Groq, or one running on your own machine.
+
+5
+00:00:46,000 --> 00:00:57,000
+You get real Python or TypeScript, with limits, retries and a built-in checkup.
+
+6
+00:00:58,000 --> 00:01:08,000
+Run it. Here is a live weather agent built in minutes.
+
+7
+00:01:09,000 --> 00:01:16,000
+Loopsmith. Free, open source, and it runs in your browser.

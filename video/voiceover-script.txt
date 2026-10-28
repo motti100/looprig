@@ -1,0 +1,23 @@
+LOOPSMITH EXPLAINER: voiceover script (77 seconds, read at a relaxed pace)
+Timestamps are when each paragraph should start.
+
+[0:00]
+Everyone is talking about AI agents. Very few people can build a good one without a week of trial and error. I built Loopsmith to fix that.
+
+[0:07]
+Here's the secret: every agent, no matter how fancy, runs the same loop. It reasons about what to do. It acts, by calling a tool. It observes what came back. And it decides: am I done, or do I go around again? Four moves. That's it.
+
+[0:22]
+Loopsmith turns that loop into a builder. Pick a proven technique: ReAct, chain of thought, tree of thoughts, retrieval, reflexion, routers, or a whole team of agents. Then tune each of the four moves.
+
+[0:36]
+It isn't tied to one vendor. OpenAI, Gemini, Claude, Groq, Mistral, DeepSeek, or a free model running on your own laptop. If it speaks the OpenAI format, it works.
+
+[0:46]
+What you get is real code: Python or TypeScript, with hard limits, retries, approval for risky tools, and a doctor command that checks your key, your model and tool calling in seconds.
+
+[0:58]
+Here's one I built in minutes: ask for the hourly weather for a zip code. It looks up the location, fetches the forecast, and writes the answer. That is the loop, running for real.
+
+[1:09]
+Loopsmith. Free, open source, one file, runs in your browser. Link below. Build something and tell me what you make.
