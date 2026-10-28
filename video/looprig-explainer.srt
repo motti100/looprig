@@ -24,4 +24,4 @@ Run it. Here is a live weather agent built in minutes.
 
 7
 00:01:09,000 --> 00:01:16,000
-Loopsmith. Free, open source, and it runs in your browser.
+Looprig. Free, open source, and it runs in your browser.

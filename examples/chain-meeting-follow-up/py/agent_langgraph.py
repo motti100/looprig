@@ -1,8 +1,8 @@
 """chain-meeting-follow-up (LangGraph version)
 Reason: direct | Act: no tools | Observe: raw | Decide: stop when done | Shape: prompt chain
 
-Exported by Loopsmith. This keeps your model, system prompt, tools, approval setting and turn limit,
-and hands the loop itself to LangGraph. Loopsmith-only techniques (tree of thoughts, reflection,
+Exported by Looprig. This keeps your model, system prompt, tools, approval setting and turn limit,
+and hands the loop itself to LangGraph. Looprig-only techniques (tree of thoughts, reflection,
 team shapes, MCP, structured output) are not carried over: use the main agent file for those.
 
   pip install langchain langgraph langchain-anthropic

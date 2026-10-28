@@ -2,7 +2,7 @@
 
 Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with [Loopsmith](.) v1.6.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v1.7.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -18,7 +18,7 @@ python agent.py "Which month had the highest revenue in sales.csv, and by how mu
 - `evals.py`: a small regression suite. Add cases as you find failures.
 - `smoke_test.py`: checks that your provider keys can do tool calling.
 - `TROUBLESHOOTING.md`: what each error means and how to fix it. Start with `python agent.py --doctor`.
-- `blueprint.json`: load it back into Loopsmith to change the design.
+- `blueprint.json`: load it back into Looprig to change the design.
 - `server.py`, `Dockerfile`, `.env.example`, `requirements.txt`: run it as an HTTP service.
 - `agent_langgraph.py`, `agent_agents_sdk.py`: the same agent on two popular frameworks (basic features only).
 

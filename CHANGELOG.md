@@ -1,6 +1,10 @@
 # Changelog
 
-Loopsmith uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
+Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
+
+## 1.7.0 (2026-10-28)
+- Renamed from Loopsmith to Looprig. Saved agents, theme and blueprints made under the old name still load.
+- Example bundles, README and the download folder use the new name.
 
 ## 1.6.0 (2026-10-28)
 - Version number shown in the app, in every generated file, in blueprints and in the README.

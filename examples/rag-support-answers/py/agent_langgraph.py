@@ -1,8 +1,8 @@
 """rag-support-answers (LangGraph version)
 Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
 
-Exported by Loopsmith. This keeps your model, system prompt, tools, approval setting and turn limit,
-and hands the loop itself to LangGraph. Loopsmith-only techniques (tree of thoughts, reflection,
+Exported by Looprig. This keeps your model, system prompt, tools, approval setting and turn limit,
+and hands the loop itself to LangGraph. Looprig-only techniques (tree of thoughts, reflection,
 team shapes, MCP, structured output) are not carried over: use the main agent file for those.
 
   pip install langchain langgraph langchain-anthropic

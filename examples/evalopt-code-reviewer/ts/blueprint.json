@@ -64,7 +64,7 @@
   },
   "system": "You are Evalopt Code Reviewer, an AI agent.\n\nGoal: Review a code file for bugs, security issues and unclear naming. Report findings ranked by severity with suggested fixes.\n\nYou work in a loop: decide what is needed, call a tool when it helps, read the result, and continue until you can answer. Tools: read_file. Use a tool only when it moves the task forward, and read each result before continuing.\n\nRules:\n- Be accurate. If you are unsure, say so instead of guessing.\n- Keep answers concise and well structured.\n- Never take an irreversible action unless the user asked for it.",
   "preset": "evalopt",
-  "format": "loopsmith-blueprint",
+  "format": "looprig-blueprint",
   "version": 1,
-  "loopsmithVersion": "1.6.0"
+  "looprigVersion": "1.7.0"
 }
