@@ -2,7 +2,7 @@
  * goal-research-brief
  * Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
  *
- * Built with Looprig v1.9.1. Run it:
+ * Built with Looprig v1.10.0. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
@@ -20,7 +20,7 @@ const MAX_TOKENS = 4096; // per model call
 const MAX_TURNS = 10; // tool-loop turns per pass through the loop
 const TOKEN_BUDGET = 300000; // hard stop for the whole run
 let APPROVAL = "risky" as "none" | "risky" | "all"; // ask before running tools
-const RISKY = new Set(["write_file", "run_python", "my_custom_tool"]);
+const RISKY = new Set(["write_file", "edit_file", "run_python", "run_shell", "my_custom_tool"]);
 const OBS_LIMIT = 6000; // max characters of one tool result the model sees
 const MAX_RETRIES = 5; // the SDK retries rate limits, 5xx errors and timeouts with backoff
 const TIMEOUT_S = 120; // seconds to wait for one model call
@@ -115,7 +115,8 @@ const TOOLS: any[] = [
 
 function safePath(p: string) {
   const full = path.resolve(p);
-  if (!full.startsWith(process.cwd())) throw new Error("path is outside the working directory");
+  const cwd = process.cwd();
+  if (full !== cwd && !full.startsWith(cwd + path.sep)) throw new Error("path is outside the working directory");
   return full;
 }
 
@@ -126,7 +127,9 @@ function toolReadFile(a: any) {
 
 function toolWriteFile(a: any) {
   const full = path.resolve(a.path);
-  if (!full.startsWith(process.cwd())) throw new Error("path is outside the working directory");
+  const cwd = process.cwd();
+  if (!full.startsWith(cwd + path.sep)) throw new Error("path is outside the working directory");
+  fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, a.content);
   return "wrote " + String(a.content).length + " characters to " + a.path;
 }

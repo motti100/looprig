@@ -54,7 +54,7 @@ def tool_calculator(args):
 
 def _safe_path(p):
     full = os.path.abspath(p)
-    if not full.startswith(os.getcwd()):
+    if os.path.commonpath([full, os.getcwd()]) != os.getcwd():
         raise ValueError("path is outside the working directory")
     return full
 

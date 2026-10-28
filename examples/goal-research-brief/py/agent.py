@@ -1,7 +1,7 @@
 """goal-research-brief
 Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
 
-Built with Looprig v1.9.1. Run it:
+Built with Looprig v1.10.0. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
@@ -37,7 +37,7 @@ MAX_TOKENS = 4096  # per model call
 MAX_TURNS = 10  # tool-loop turns per pass through the loop
 TOKEN_BUDGET = 300000  # hard stop for the whole run
 APPROVAL = "risky"  # "none" | "risky" | "all": ask before running tools
-RISKY = {"write_file", "run_python", "my_custom_tool"}
+RISKY = {"write_file", "edit_file", "run_python", "run_shell", "my_custom_tool"}
 OBS_LIMIT = 6000  # max characters of one tool result the model sees
 MAX_RETRIES = 5  # the SDK retries rate limits, 5xx errors and timeouts with backoff
 TIMEOUT = 120  # seconds to wait for one model call
@@ -132,7 +132,7 @@ TOOLS = [
 
 def _safe_path(p):
     full = os.path.abspath(p)
-    if not full.startswith(os.getcwd()):
+    if os.path.commonpath([full, os.getcwd()]) != os.getcwd():
         raise ValueError("path is outside the working directory")
     return full
 
@@ -144,8 +144,9 @@ def tool_read_file(args):
 
 def tool_write_file(args):
     path = os.path.abspath(args["path"])
-    if not path.startswith(os.getcwd()):
+    if os.path.commonpath([path, os.getcwd()]) != os.getcwd():
         raise ValueError("path is outside the working directory")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(args["content"])
     return f"wrote {len(args['content'])} characters to {args['path']}"

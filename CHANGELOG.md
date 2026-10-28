@@ -2,6 +2,12 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.10.0 (2026-10-28)
+- New four-step layout: Describe, Choose how it thinks, Try it, Fine-tune and get code. Technique cards with plain descriptions, a floating header with step links, softer surfaces and a clearer light and dark look.
+- Project builder technique: list_dir, edit_file (exact edits) and run_shell (allowlisted commands such as pytest and npm test) in Python and TypeScript agents, with a plan, build, test, fix loop.
+- Playground runs project tasks in the browser: an in-memory project folder, a JavaScript sandbox (run_js) with a 10 second limit and no network, a files viewer and a zip download.
+- write_file now creates folders; path checks no longer allow sibling-folder prefixes.
+
 ## 1.9.1 (2026-10-28)
 - Playground: the agent is now told only about the tools the browser really offers, so it no longer tries write_file or run_python and fails. Unknown tool calls get a reply that lists what is available.
 

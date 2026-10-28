@@ -1,7 +1,7 @@
 """coder-data-analyst
 Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with Looprig v1.9.1. Run it:
+Built with Looprig v1.10.0. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
@@ -39,7 +39,7 @@ MAX_TOKENS = 4096  # per model call
 MAX_TURNS = 10  # tool-loop turns per pass through the loop
 TOKEN_BUDGET = 200000  # hard stop for the whole run
 APPROVAL = "risky"  # "none" | "risky" | "all": ask before running tools
-RISKY = {"write_file", "run_python", "my_custom_tool"}
+RISKY = {"write_file", "edit_file", "run_python", "run_shell", "my_custom_tool"}
 OBS_LIMIT = 6000  # max characters of one tool result the model sees
 MAX_RETRIES = 5  # the SDK retries rate limits, 5xx errors and timeouts with backoff
 TIMEOUT = 120  # seconds to wait for one model call
@@ -133,7 +133,7 @@ def tool_calculator(args):
 
 def _safe_path(p):
     full = os.path.abspath(p)
-    if not full.startswith(os.getcwd()):
+    if os.path.commonpath([full, os.getcwd()]) != os.getcwd():
         raise ValueError("path is outside the working directory")
     return full
 

@@ -36,7 +36,7 @@ Rules:
 
 def _safe_path(p):
     full = os.path.abspath(p)
-    if not full.startswith(os.getcwd()):
+    if os.path.commonpath([full, os.getcwd()]) != os.getcwd():
         raise ValueError("path is outside the working directory")
     return full
 
@@ -48,8 +48,9 @@ def tool_read_file(args):
 
 def tool_write_file(args):
     path = os.path.abspath(args["path"])
-    if not path.startswith(os.getcwd()):
+    if os.path.commonpath([path, os.getcwd()]) != os.getcwd():
         raise ValueError("path is outside the working directory")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(args["content"])
     return f"wrote {len(args['content'])} characters to {args['path']}"
