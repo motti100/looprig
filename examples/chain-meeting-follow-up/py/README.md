@@ -2,7 +2,7 @@
 
 Reason: direct | Act: no tools | Observe: raw | Decide: stop when done | Shape: prompt chain
 
-Built with [LoopRig](.) v3.6.5. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [LoopRig](.) v3.6.6. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
