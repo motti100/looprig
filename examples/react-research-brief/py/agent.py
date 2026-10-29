@@ -1,7 +1,7 @@
 """react-research-brief
 Reason: ReAct | Act: web_search, fetch_url | Observe: raw | Decide: stop when done | Shape: single agent
 
-Built with Looprig v1.11.0. Run it:
+Built with Looprig v1.12.0. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...

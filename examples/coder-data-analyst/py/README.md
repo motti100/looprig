@@ -2,7 +2,7 @@
 
 Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with [Looprig](.) v1.11.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v1.12.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 

@@ -4,236 +4,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classic Breakout Game</title>
+    <title>Classic Frogger Game</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #222;
             color: #fff;
             font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 5px;
+            color: #4CAF50;
         }
         canvas {
-            background: #000;
-            display: block;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-            border: 2px solid #00ffff;
+            border: 4px solid #fff;
+            background-color: #111;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        #info {
+            margin-top: 10px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="breakoutCanvas" width="480" height="320"></canvas>
+    <h1>FROGGER</h1>
+    <div id="info">Use Arrow Keys or WASD to move. Reach the top goals!</div>
+    <br>
+    <canvas id="gameCanvas" width="448" height="512"></canvas>
 
     <script>
-        const canvas = document.getElementById("breakoutCanvas");
-        const ctx = canvas.getContext("2d");
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        // Game variables
+        const GRID_SIZE = 32;
+        const COLS = 14;
+        const ROWS = 16;
+
+        // Game State
         let score = 0;
         let lives = 3;
+        let gameWon = false;
+        let gameOver = false;
+        let goalSlots = [false, false, false, false, false]; // 5 goals at top
 
-        // Ball variables
-        let x = canvas.width / 2;
-        let y = canvas.height - 30;
-        let dx = 2;
-        let dy = -2;
-        const ballRadius = 6;
+        // Frog object
+        let frog = {
+            x: 6 * GRID_SIZE,
+            y: 14 * GRID_SIZE,
+            width: GRID_SIZE - 4,
+            height: GRID_SIZE - 4,
+            speed: GRID_SIZE
+        };
 
-        // Paddle variables
-        const paddleHeight = 10;
-        const paddleWidth = 75;
-        let paddleX = (canvas.width - paddleWidth) / 2;
+        // Obstacles & Logs setup
+        // Lanes from top to bottom:
+        // 0: Goal row (y = 0)
+        // 1: River start (y = 1 to 4)
+        // 5: Safe median (y = 5)
+        // 6: Road start (y = 6 to 10)
+        // 11: Start / Bottom safe zone (y = 11 to 15)
+
+        let lanes = [
+            // River Lanes (Logs / Turtles)
+            { type: 'log', y: 1 * GRID_SIZE, speed: 1.5, length: 3, items: [{x: 0}, {x: 200}, {x: 380}] },
+            { type: 'log', y: 2 * GRID_SIZE, speed: -2, length: 2, items: [{x: 50}, {x: 250}, {x: 400}] },
+            { type: 'log', y: 3 * GRID_SIZE, speed: 1, length: 4, items: [{x: 100}, {x: 320}] },
+            { type: 'log', y: 4 * GRID_SIZE, speed: -2.5, length: 2, items: [{x: 0}, {x: 180}, {x: 350}] },
+            
+            // Road Lanes (Cars)
+            { type: 'car', y: 7 * GRID_SIZE, speed: 2, length: 2, items: [{x: 50}, {x: 250}, {x: 400}], color: '#e74c3c' },
+            { type: 'car', y: 8 * GRID_SIZE, speed: -1.5, length: 1, items: [{x: 100}, {x: 300}], color: '#f1c40f' },
+            { type: 'car', y: 9 * GRID_SIZE, speed: 3, length: 1.5, items: [{x: 0}, {x: 200}, {x: 350}], color: '#9b59b6' },
+            { type: 'car', y: 10 * GRID_SIZE, speed: -2, length: 2, items: [{x: 80}, {x: 280}], color: '#3498db' },
+            { type: 'car', y: 11 * GRID_SIZE, speed: 1.5, length: 1, items: [{x: 30}, {x: 220}, {x: 380}], color: '#e67e22' }
+        ];
 
         // Controls
-        let rightPressed = false;
-        let leftPressed = false;
-
-        // Brick configuration
-        const brickRowCount = 5;
-        const brickColumnCount = 7;
-        const brickWidth = 54;
-        const brickHeight = 15;
-        const brickPadding = 10;
-        const brickOffsetTop = 30;
-        const brickOffsetLeft = 20;
-
-        const brickColors = ["#ff4444", "#ffbb33", "#00C851", "#33b5e5", "#aa66cc"];
-
-        // Initialize bricks
-        let bricks = [];
-        function initBricks() {
-            for (let c = 0; c < brickColumnCount; c++) {
-                bricks[c] = [];
-                for (let r = 0; r < brickRowCount; r++) {
-                    bricks[c][r] = { x: 0, y: 0, status: 1 };
-                }
+        window.addEventListener('keydown', (e) => {
+            if (gameOver || gameWon) {
+                if (e.key === 'r' || e.key === 'R') resetGame();
+                return;
             }
-        }
-        initBricks();
 
-        // Event listeners for keyboard
-        document.addEventListener("keydown", keyDownHandler, false);
-        document.addEventListener("keyup", keyUpHandler, false);
-
-        function keyDownHandler(e) {
-            if (e.key === "Right" || e.key === "ArrowRight") {
-                rightPressed = true;
-            } else if (e.key === "Left" || e.key === "ArrowLeft") {
-                leftPressed = true;
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    frog.y -= GRID_SIZE;
+                    score += 10; // Reward moving forward
+                    break;
+                case 'ArrowDown':
+                case 'w': // handled above
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (frog.y < (ROWS - 2) * GRID_SIZE) frog.y += GRID_SIZE;
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (frog.x > 0) frog.x -= GRID_SIZE;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (frog.x < canvas.width - GRID_SIZE) frog.x += GRID_SIZE;
+                    break;
             }
-        }
 
-        function keyUpHandler(e) {
-            if (e.key === "Right" || e.key === "ArrowRight") {
-                rightPressed = false;
-            } else if (e.key === "Left" || e.key === "ArrowLeft") {
-                leftPressed = false;
-            }
-        }
+            // Boundary clamp
+            if (frog.x < 0) frog.x = 0;
+            if (frog.x > canvas.width - GRID_SIZE) frog.x = canvas.width - GRID_SIZE;
+            if (frog.y < 0) frog.y = 0;
+        });
 
-        // Collision detection for bricks
-        function collisionDetection() {
-            for (let c = 0; c < brickColumnCount; c++) {
-                for (let r = 0; r < brickRowCount; r++) {
-                    let b = bricks[c][r];
-                    if (b.status === 1) {
-                        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
-                            dy = -dy;
-                            b.status = 0;
-                            score += (brickRowCount - r) * 10; // Higher rows worth more points
-                            
-                            // Check for win condition
-                            if (score === totalScorePossible()) {
-                                alert("YOU WIN, CONGRATULATIONS!");
-                                document.location.reload();
-                            }
+        function update() {
+            if (gameOver || gameWon) return;
+
+            // Move obstacles & logs
+            lanes.forEach(lane => {
+                lane.items.forEach(item => {
+                    item.x += lane.speed;
+                    // Wrap around screen
+                    if (lane.speed > 0 && item.x > canvas.width) {
+                        item.x = -lane.length * GRID_SIZE;
+                    } else if (lane.speed < 0 && item.x < -lane.length * GRID_SIZE) {
+                        item.x = canvas.width;
+                    }
+                });
+            });
+
+            // Check frog position in river vs road
+            let frogRow = Math.round(frog.y / GRID_SIZE);
+
+            // River check (Rows 1 to 4)
+            if (frogRow >= 1 && frogRow <= 4) {
+                let lane = lanes.find(l => l.y === frog.y);
+                let onLog = false;
+
+                if (lane) {
+                    lane.items.forEach(item => {
+                        let logLeft = item.x;
+                        let logRight = item.x + (lane.length * GRID_SIZE);
+                        // Check if frog is standing on this log
+                        if (frog.x + 10 >= logLeft && frog.x + frog.width - 10 <= logRight) {
+                            onLog = true;
+                            frog.x += lane.speed; // Ride log
                         }
-                    }
+                    });
                 }
-            }
-        }
 
-        function totalScorePossible() {
-            let total = 0;
-            for (let r = 0; r < brickRowCount; r++) {
-                total += brickColumnCount * ((brickRowCount - r) * 10);
-            }
-            return total;
-        }
-
-        // Drawing functions
-        function drawBall() {
-            ctx.beginPath();
-            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-            ctx.fillStyle = "#00ffff";
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function drawPaddle() {
-            ctx.beginPath();
-            ctx.rect(paddleX, canvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
-            ctx.fillStyle = "#ffffff";
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function drawBricks() {
-            for (let c = 0; c < brickColumnCount; c++) {
-                for (let r = 0; r < brickRowCount; r++) {
-                    if (bricks[c][r].status === 1) {
-                        let brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
-                        let brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
-                        bricks[c][r].x = brickX;
-                        bricks[c][r].y = brickY;
-                        ctx.beginPath();
-                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                        ctx.fillStyle = brickColors[r];
-                        ctx.fill();
-                        ctx.closePath();
-                    }
-                }
-            }
-        }
-
-        function drawScore() {
-            ctx.font = "12px 'Courier New'";
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText("Score: " + score, 20, 20);
-        }
-
-        function drawLives() {
-            ctx.font = "12px 'Courier New'";
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText("Lives: " + lives, canvas.width - 80, 20);
-        }
-
-        // Main game loop
-        function draw() {
-            // Clear canvas
-            ctx.clearRect(0, canvas.width, canvas.height);
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            drawBricks();
-            drawBall();
-            drawPaddle();
-            drawScore();
-            drawLives();
-            collisionDetection();
-
-            // Wall bounce logic (Left & Right)
-            if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-                dx = -dx;
-            }
-
-            // Wall bounce logic (Top & Bottom/Paddle)
-            if (y + dy < ballRadius) {
-                dy = -dy;
-            } else if (y + dy > canvas.height - ballRadius - 5) {
-                // Check if hit paddle
-                if (x > paddleX && x < paddleX + paddleWidth) {
-                    // Add slight angle variance depending on where it hits the paddle
-                    let hitPoint = x - (paddleX + paddleWidth / 2);
-                    dx = hitPoint * 0.15; 
-                    dy = -dy;
+                if (!onLog) {
+                    die();
                 } else {
-                    // Lose a life
-                    lives--;
-                    if (!lives) {
-                        alert("GAME OVER");
-                        document.location.reload();
-                    } else {
-                        // Reset ball and paddle
-                        x = canvas.width / 2;
-                        y = canvas.height - 30;
-                        dx = 2;
-                        dy = -2;
-                        paddleX = (canvas.width - paddleWidth) / 2;
+                    // Check if frog rode off screen
+                    if (frog.x < 0 || frog.x > canvas.width - GRID_SIZE) {
+                        die();
                     }
                 }
             }
 
-            // Move paddle
-            if (rightPressed && paddleX < canvas.width - paddleWidth) {
-                paddleX += 5;
-            } else if (leftPressed && paddleX > 0) {
-                paddleX -= 5;
+            // Road check (Rows 7 to 11)
+            if (frogRow >= 7 && frogRow <= 11) {
+                let lane = lanes.find(l => l.y === frog.y);
+                if (lane) {
+                    lane.items.forEach(item => {
+                        let carLeft = item.x;
+                        let carRight = item.x + (lane.length * GRID_SIZE);
+                        // AABB Collision with car
+                        if (frog.x < carRight && frog.x + frog.width > carLeft) {
+                            die();
+                        }
+                    });
+                }
             }
 
-            // Move ball
-            x += dx;
-            y += dy;
-
-            requestAnimationFrame(draw);
+            // Goal check (Row 0)
+            if (frogRow === 0) {
+                // Determine which goal slot based on X position
+                // 5 goal slots across 14 columns: columns 1, 4, 7, 10, 13 roughly
+                let slotIndex = Math.floor(frog.x / (canvas.width / 5));
+                if (slotIndex >= 0 && slotIndex < 5) {
+                    if (!goalSlots[slotIndex]) {
+                        goalSlots[slotIndex] = true;
+                        score += 200;
+                        checkWinCondition();
+                        resetFrog();
+                    } else {
+                        // Already filled slot
+                        die();
+                    }
+                } else {
+                    die();
+                }
+            }
         }
 
-        draw();
+        function die() {
+            lives--;
+            if (lives <= 0) {
+                gameOver = true;
+            } else {
+                resetFrog();
+            }
+        }
+
+        function resetFrog() {
+            frog.x = 6 * GRID_SIZE;
+            frog.y = 14 * GRID_SIZE;
+        }
+
+        function checkWinCondition() {
+            if (goalSlots.every(slot => slot === true)) {
+                gameWon = true;
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            gameOver = false;
+            gameWon = false;
+            goalSlots = [false, false, false, false, false];
+            resetFrog();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Background Areas
+            // Grass / Safe zones (Row 0, 5, 12-15)
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(0, 0, canvas.width, GRID_SIZE); // Goal row background
+            ctx.fillRect(0, 5 * GRID_SIZE, canvas.width, GRID_SIZE); // Median
+            ctx.fillRect(0, 12 * GRID_SIZE, canvas.width, 4 * GRID_SIZE); // Start area
+
+            // River Area (Rows 1-4)
+            ctx.fillStyle = '#1b4f72';
+            ctx.fillRect(0, 1 * GRID_SIZE, canvas.width, 4 * GRID_SIZE);
+
+            // Road Area (Rows 7-11)
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(0, 7 * GRID_SIZE, canvas.width, 5 * GRID_SIZE);
+
+            // Draw Goals
+            for (let i = 0; i < 5; i++) {
+                let gx = i * (canvas.width / 5) + 20;
+                ctx.fillStyle = goalSlots[i] ? '#2ecc71' : '#111';
+                ctx.fillRect(gx, 4, GRID_SIZE - 8, GRID_SIZE - 8);
+            }
+
+            // Draw Lanes (Logs & Cars)
+            lanes.forEach(lane => {
+                lane.items.forEach(item => {
+                    if (lane.type === 'log') {
+                        ctx.fillStyle = '#8e44ad';
+                        ctx.fillRect(item.x, lane.y + 2, lane.length * GRID_SIZE - 4, GRID_SIZE - 4);
+                    } else if (lane.type === 'car') {
+                        ctx.fillStyle = lane.color;
+                        ctx.fillRect(item.x, lane.y + 2, lane.length * GRID_SIZE - 4, GRID_SIZE - 4);
+                    }
+                });
+            });
+
+            // Draw Frog
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(frog.x + 2, frog.y + 2, frog.width, frog.height);
+            // Frog eyes
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(frog.x + 6, frog.y + 4, 6, 6);
+            ctx.fillRect(frog.x + frog.width - 12, frog.y + 4, 6, 6);
+
+            // Draw UI / HUD
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px Courier New';
+            ctx.fillText(`Score: ${score}`, 10, canvas.height - 10);
+            ctx.fillText(`Lives: ${'🐸'.repeat(lives)}`, canvas.width - 130, canvas.height - 10);
+
+            // Game Over / Win Screens
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = '32px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px Courier New';
+                ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 20);
+                ctx.textAlign = 'left';
+            } else if (gameWon) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#2ecc71';
+                ctx.font = '32px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText('YOU WIN!', canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px Courier New';
+                ctx.fillText('Press R to Play Again', canvas.width / 2, canvas.height / 2 + 20);
+                ctx.textAlign = 'left';
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start game loop
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>

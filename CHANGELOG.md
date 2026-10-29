@@ -2,6 +2,13 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.12.0 (2026-10-29)
+- Simple mode is now the default: pick a plain-language starter, try it, get code. Advanced keeps every control
+- New short, readable agent (about a hundred lines on the official Claude and OpenAI SDKs), tested against the real SDKs, in Python and TypeScript
+- Watch a demo: a scripted run of the real loop, tools and preview, so no API key is needed to see an agent work
+- Optional Learn with quests (Simple mode only): seven quests, progress saved on your device
+- Next steps tab and NEXT_STEPS.md; a test that the browser Playground and the generated code make the same model calls for every technique
+
 ## 1.11.0 (2026-10-28)
 - Playground runs every technique: tree of thoughts, plan, self-consistency, grounding, reflexion, evaluator, human review, router, chain, parallel, orchestrator, supervisor team, goal loop and chat
 - New preview_html tool: pages and games the agent writes load in a sandboxed preview that reports JavaScript errors, drawing and key response back to the agent
