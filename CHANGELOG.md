@@ -2,6 +2,13 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.5.0 (2026-10-29)
+- New in the Lab: Skills A/B. Run the same task with and without a skill, several times each, and see whether it really helped.
+- Skills can now bundle scripts and reference files. Add a line like <!-- file: scripts/count.py --> in the editor. The agent reads them with load_skill, and run_js or run_shell can run them.
+- Every Python bundle now includes agent_mcp.py: your agent's tools, plus ask_agent for the whole agent, as an MCP server for Claude Desktop, Claude Code and Cursor. Risky tools stay off unless you set ALLOW_RISKY_TOOLS=1.
+- Builder runs that get empty replies now log the model's finish reason, ask for smaller files, and stop with advice instead of (no answer).
+- Fixed the LangGraph and Agents SDK exports for tools with an optional argument.
+
 ## 3.4.1 (2026-10-29)
 - Fixed builder runs that kept stopping: replies cut off by the output limit are now detected, and file-writing runs ask for room for whole files (8192 tokens).
 - The agent can no longer finish while the page links to a file that does not exist (like game.js), and the preview names missing files.

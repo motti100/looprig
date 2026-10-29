@@ -2,7 +2,7 @@
 
 Reason: ReAct | Act: web_search, fetch_url | Observe: raw | Decide: stop when done | Shape: single agent
 
-Built with [LoopRig](.) v3.4.1. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [LoopRig](.) v3.5.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -24,6 +24,7 @@ Give it files or pictures: `python agent.py "your task" --file notes.txt --image
 - `AGENTS.md`: short notes for coding agents and teammates (how to run, layout, conventions).
 - `server.py`, `Dockerfile`, `.env.example`, `requirements.txt`: run it as an HTTP service.
 - `agent_langgraph.py`, `agent_agents_sdk.py`: the same agent on two popular frameworks (basic features only).
+- `agent_mcp.py`: your agent's tools, and the agent itself (ask_agent), as an MCP server for Claude Desktop, Claude Code and Cursor.
 
 ## Before you rely on it
 
