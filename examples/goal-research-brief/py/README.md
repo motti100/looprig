@@ -2,7 +2,7 @@
 
 Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
 
-Built with [Looprig](.) v2.2.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [Looprig](.) v2.3.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 

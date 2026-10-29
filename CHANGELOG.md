@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 2.3.0 (2026-10-29)
+- Learn: a Watch it happen player in every quest. A ring lights Reason, Act, Observe and Decide, and a message bubble travels between You, the model and your code with a plain-language caption for each step. Play, pause, step back and forward, replay at three speeds. It follows a live run and works for every demo.
+
 ## 2.2.0 (2026-10-29)
 - Security: the standalone page now ships a Content Security Policy (no external scripts, no plain-http requests except localhost, no forms, no base changes, no plugins), plus SECURITY.md and a README section explaining how API keys are handled
 
