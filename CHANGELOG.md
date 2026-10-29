@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.13.1 (2026-10-29)
+- Preview has a Maximize button (Esc or Exit maximize to leave) and a taller default size
+
 ## 1.13.0 (2026-10-29)
 - Keep improving a project: describe a change and Refine edits the files you already have, with quick suggestions
 - The project is remembered on this device across reloads; attaching an existing file makes it a project; Clear project and Restore the previous files
