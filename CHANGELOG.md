@@ -2,6 +2,14 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.6.1 (2026-10-29)
+- Learn path: every finished quest now names the technique it covered (for example ReAct, Router, Reflexion)
+
+## 3.6.0 (2026-10-29)
+- Learn path: new World 10, When It Goes Wrong (empty replies, cut-off output, missing files, pass rules, build-test-ship boss)
+- Learn path: new quests for Chain of Thought, Tree of Thoughts and blending techniques, so every technique on the Advanced map is taught
+- Learn path: 46 quests in ten worlds
+
 ## 3.5.0 (2026-10-29)
 - New in the Lab: Skills A/B. Run the same task with and without a skill, several times each, and see whether it really helped.
 - Skills can now bundle scripts and reference files. Add a line like <!-- file: scripts/count.py --> in the editor. The agent reads them with load_skill, and run_js or run_shell can run them.
