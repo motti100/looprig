@@ -2,7 +2,7 @@
 
 Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
 
-Built with [LoopRig](.) v3.6.1. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [LoopRig](.) v3.6.2. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 

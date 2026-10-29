@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.6.2 (2026-10-29)
+- Fix: the step links (1 Describe, 2 Try it, 3 Code) no longer scroll the heading under the sticky top bar
+
 ## 3.6.1 (2026-10-29)
 - Learn path: every finished quest now names the technique it covered (for example ReAct, Router, Reflexion)
 
