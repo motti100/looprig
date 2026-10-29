@@ -1,7 +1,7 @@
 """rag-support-answers
 Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
 
-Built with Looprig v2.0.3. Run it:
+Built with Looprig v2.1.1. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...

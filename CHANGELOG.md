@@ -2,6 +2,12 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 2.1.1 (2026-10-29)
+- PayPal donate link (paypal.me/motti10) on the home screen and in Learn; adds .github/FUNDING.yml
+
+## 2.1.0 (2026-10-29)
+- Support links: optional PayPal, GitHub Sponsors, Ko-fi, Buy Me a Coffee and Patreon links on the home screen and in Learn, set in one file (donate.json). Plain links only, no third-party scripts. A GitHub Sponsor button file is generated when configured.
+
 ## 2.0.3 (2026-10-29)
 - The version number is shown on the home screen and in Learn again, not only in the builder
 

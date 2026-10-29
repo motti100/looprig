@@ -2,7 +2,7 @@
  * chain-meeting-follow-up
  * Reason: direct | Act: no tools | Observe: raw | Decide: stop when done | Shape: prompt chain
  *
- * Built with Looprig v2.0.3. Run it:
+ * Built with Looprig v2.1.1. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
