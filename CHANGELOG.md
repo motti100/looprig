@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.13.2 (2026-10-29)
+- Agents that reply with nothing are nudged to continue (up to twice) instead of silently ending the turn, and the Playground log now shows what the model said or that its reply was empty
+
 ## 1.13.1 (2026-10-29)
 - Preview has a Maximize button (Esc or Exit maximize to leave) and a taller default size
 

@@ -2,7 +2,7 @@
  * rag-support-answers
  * Reason: ReAct | Act: search_docs | Observe: compress | Decide: ground | Shape: single agent
  *
- * Built with Looprig v1.13.1. Run it:
+ * Built with Looprig v1.13.2. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
@@ -272,6 +272,7 @@ async function observe(name: string, text: string, task: string): Promise<string
 // ---- the loop: REASON -> ACT -> OBSERVE -> DECIDE whether to go round again ---------
 async function agentLoop(task: string, system = SYSTEM, history: any[] = [], tools: any[] = TOOLS): Promise<string> {
   history.push({ role: "user", content: userContent(task) });
+  let empties = 0;
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
     if (usedTokens() > TOKEN_BUDGET) return "[stopped: token budget reached]";
     const reply = await chat(system, history, tools, true); // REASON
@@ -281,7 +282,16 @@ async function agentLoop(task: string, system = SYSTEM, history: any[] = [], too
     }
     if (reply.paused) continue;
     const calls = reply.calls;
-    if (!calls.length) return reply.text; // DECIDE: no more actions requested, so the model is done
+    if (!calls.length) { // DECIDE: no more actions requested, so the model is done
+      if (!reply.text.trim() && empties < 2) { // saying nothing at all means stuck, not finished
+        empties++;
+        console.log("[reason " + turn + "] (empty reply, asking the model to continue)");
+        history.pop();
+        history.push({ role: "user", content: "You replied with nothing. Continue: call a tool, or give your final answer." });
+        continue;
+      }
+      return reply.text;
+    }
     const done = calls.find((c) => c.name === "finish");
     if (done) {
       FINISHED.flag = true;

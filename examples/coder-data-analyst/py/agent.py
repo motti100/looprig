@@ -1,7 +1,7 @@
 """coder-data-analyst
 Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with Looprig v1.13.1. Run it:
+Built with Looprig v1.13.2. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
@@ -367,6 +367,7 @@ def agent_loop(task, system=SYSTEM, history=None, tools=None):
     tools = TOOLS if tools is None else tools
     messages = history if history is not None else []
     messages.append({"role": "user", "content": user_content(task)})
+    empties = 0
     for turn in range(1, MAX_TURNS + 1):
         if used_tokens() > TOKEN_BUDGET:
             return "[stopped: token budget reached]"
@@ -378,6 +379,12 @@ def agent_loop(task, system=SYSTEM, history=None, tools=None):
             continue
         calls = reply["calls"]
         if not calls:  # DECIDE: no more actions requested, so the model is done
+            if not reply["text"].strip() and empties < 2:  # saying nothing at all means stuck, not finished
+                empties += 1
+                print(f"[reason {turn}] (empty reply, asking the model to continue)")
+                messages.pop()
+                messages.append({"role": "user", "content": "You replied with nothing. Continue: call a tool, or give your final answer."})
+                continue
             return reply["text"]
         for c in calls:
             if c["name"] == "finish":
