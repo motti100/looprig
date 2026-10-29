@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 2.2.0 (2026-10-29)
+- Security: the standalone page now ships a Content Security Policy (no external scripts, no plain-http requests except localhost, no forms, no base changes, no plugins), plus SECURITY.md and a README section explaining how API keys are handled
+
 ## 2.1.1 (2026-10-29)
 - PayPal donate link (paypal.me/motti10) on the home screen and in Learn; adds .github/FUNDING.yml
 

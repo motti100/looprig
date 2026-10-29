@@ -64,5 +64,5 @@
   "preset": "chain",
   "format": "looprig-blueprint",
   "version": 1,
-  "looprigVersion": "2.1.1"
+  "looprigVersion": "2.2.0"
 }

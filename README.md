@@ -1,4 +1,4 @@
-# Looprig v2.1.1
+# Looprig v2.2.0
 
 Build any AI agent from four moves: Reason, Act, Observe, Decide. Pick a technique (ReAct, chain or tree of thought, self-consistency, agentic RAG, Reflexion, routers, supervisor teams, goal loops) or tune each move, then copy working Python or TypeScript.
 
@@ -30,6 +30,10 @@ Put `index.html` on any static host (Cloudflare Pages, GitHub Pages, Netlify). F
 ## Notes
 
 Generated code is a starting point. Read it before giving an agent tools that write, run code or reach the web. Model names change; pick "Other" in the model list to type a new id.
+
+## Security
+
+See `SECURITY.md`. In short: keys stay in your browser and go only to the provider you pick; the page loads no third-party code and ships a Content Security Policy; agents in the Playground work on a pretend folder and run code in a sandbox.
 
 ## When something goes wrong
 
