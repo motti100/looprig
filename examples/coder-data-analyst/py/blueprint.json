@@ -68,5 +68,5 @@
   "preset": "coder",
   "format": "looprig-blueprint",
   "version": 1,
-  "looprigVersion": "1.12.4"
+  "looprigVersion": "1.12.5"
 }

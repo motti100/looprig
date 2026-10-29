@@ -2,7 +2,7 @@
  * goal-research-brief
  * Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
  *
- * Built with Looprig v1.12.4. Run it:
+ * Built with Looprig v1.12.5. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
@@ -154,6 +154,7 @@ const IMPLS: Record<string, (a: any) => any> = {
 // ---- provider adapter: the only code that knows which API is underneath -------------
 const USAGE = { in: 0, out: 0 };
 const FINISHED = { flag: false, summary: "" };
+const WORK = { n: 0 }; // tool calls that do something (not just reading), so a stuck goal loop can be noticed
 const OBS_LOG: string[] = []; // raw tool results, kept as evidence
 
 const usedTokens = () => USAGE.in + USAGE.out;
@@ -304,6 +305,7 @@ async function callTool(name: string, args: any): Promise<string> {
     const answer = await ask("\n  approve " + name + "(" + JSON.stringify(args).slice(0, 200) + ")? [y/N] ");
     if (answer.trim().toLowerCase() !== "y") return "error: the user declined this action";
   }
+  if (!["read_file", "list_dir", "calculator", "ask_human"].includes(name)) WORK.n++;
   try {
     return String(await fn(args));
   } catch (e: any) {
@@ -422,16 +424,28 @@ const MAX_ITERATIONS = 8;
 
 /** Goal loop: every iteration starts fresh and reads its notes from disk, until `finish` or a cap. */
 async function run(task: string): Promise<string> {
+  let stalls = 0;
+  let nudge = "";
   for (let i = 1; i <= MAX_ITERATIONS; i++) {
     const notes = fs.existsSync(PROGRESS) ? fs.readFileSync(PROGRESS, "utf8") : "(nothing yet)";
     const prompt =
       "GOAL:\n" + task + "\n\nPROGRESS NOTES:\n" + notes + "\n\n" +
-      "Do the next most useful chunk of work. Rewrite " + PROGRESS + " with write_file, keeping earlier notes and adding what you just did. " +
-      "Call finish with a summary only when the goal is fully met.";
+      "Do the next most useful chunk of real work now: create or change the project files with write_file or edit_file, " +
+      "check them if you can, then update " + PROGRESS + " with what you did. Listing and reading files is not progress. " +
+      "Call finish with a summary only when the goal is fully met." + nudge;
     console.log("\n=== iteration " + i + "/" + MAX_ITERATIONS + " ===");
+    const before = WORK.n;
     await topology(prompt);
     if (FINISHED.flag) {
       return FINISHED.summary;
+    }
+    if (WORK.n === before) {
+      stalls++;
+      nudge = "\n\nLAST ROUND DID NOTHING: it only read or listed files. This round, call write_file or another action tool straight away. Do not just read.";
+      if (stalls >= 3) return "[stopped: no progress for 3 rounds. The agent only read files and never wrote or ran anything. Try a stronger model or a more specific goal.]";
+    } else {
+      stalls = 0;
+      nudge = "";
     }
     if (usedTokens() > TOKEN_BUDGET) return "[stopped: token budget reached]";
   }

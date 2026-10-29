@@ -1,7 +1,7 @@
 """goal-research-brief
 Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
 
-Built with Looprig v1.12.4. Run it:
+Built with Looprig v1.12.5. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
@@ -167,6 +167,7 @@ IMPLS = {
 # ---- provider adapter: the only code that knows which API is underneath -------------
 USAGE = {"in": 0, "out": 0}
 FINISHED = {"flag": False, "summary": ""}
+WORK = {"n": 0}  # tool calls that do something (not just reading), so a stuck goal loop can be noticed
 OBS_LOG = []  # raw tool results, kept as evidence
 
 
@@ -318,6 +319,8 @@ def call_tool(name, args):
     if APPROVAL == "all" or (APPROVAL == "risky" and risky):
         if input(f"\n  approve {name}({json.dumps(args)[:200]})? [y/N] ").strip().lower() != "y":
             return "error: the user declined this action"
+    if name not in ("read_file", "list_dir", "calculator", "ask_human"):
+        WORK["n"] += 1
     try:
         return str(fn(args))
     except Exception as e:  # tool errors go back to the model so it can adjust
@@ -435,17 +438,27 @@ MAX_ITERATIONS = 8
 
 def run(task):
     """Goal loop: every iteration starts fresh and reads its notes from disk, until `finish` or a cap."""
+    stalls, nudge = 0, ""
     for i in range(1, MAX_ITERATIONS + 1):
         notes = open(PROGRESS, encoding="utf-8").read() if os.path.exists(PROGRESS) else "(nothing yet)"
         prompt = (
             f"GOAL:\n{task}\n\nPROGRESS NOTES:\n{notes}\n\n"
-            f"Do the next most useful chunk of work. Rewrite {PROGRESS} with write_file, keeping earlier notes and adding what you just did. "
-            "Call finish with a summary only when the goal is fully met."
+            "Do the next most useful chunk of real work now: create or change the project files with write_file or edit_file, "
+            f"check them if you can, then update {PROGRESS} with what you did. Listing and reading files is not progress. "
+            "Call finish with a summary only when the goal is fully met." + nudge
         )
         print(f"\n=== iteration {i}/{MAX_ITERATIONS} ===")
+        before = WORK["n"]
         topology(prompt)
         if FINISHED["flag"]:
             return FINISHED["summary"]
+        if WORK["n"] == before:
+            stalls += 1
+            nudge = "\n\nLAST ROUND DID NOTHING: it only read or listed files. This round, call write_file or another action tool straight away. Do not just read."
+            if stalls >= 3:
+                return "[stopped: no progress for 3 rounds. The agent only read files and never wrote or ran anything. Try a stronger model or a more specific goal.]"
+        else:
+            stalls, nudge = 0, ""
         if used_tokens() > TOKEN_BUDGET:
             return "[stopped: token budget reached]"
     return "[stopped: iteration limit]"

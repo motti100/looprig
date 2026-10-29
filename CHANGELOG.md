@@ -2,6 +2,10 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.12.5 (2026-10-29)
+- Goal loop now asks for real file changes each round, nudges after an idle round, and stops with a clear message after three idle rounds (browser, Python and TypeScript)
+- Tip shown when a small model is picked for a project-building agent
+
 ## 1.12.4 (2026-10-29)
 - Playground errors now say where it broke: no connection at all, a blocked response (usually a browser extension or VPN), or a request the provider refused
 
