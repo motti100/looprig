@@ -2,7 +2,7 @@
  * react-research-brief
  * Reason: ReAct | Act: web_search, fetch_url | Observe: raw | Decide: stop when done | Shape: single agent
  *
- * Built with LoopRig v3.3.0. Run it:
+ * Built with LoopRig v3.3.1. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"

@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.3.1 (2026-10-29)
+- Fixed: the Playground preview now always shows the latest version of your page after a Refine, even if the agent forgot to preview it.
+
 ## 3.3.0 (2026-10-29)
 - Playground redesign: Connect and Give it a job cards, a clear Run bar, and a self-contained agent console.
 - The console keeps its own colors in light and dark themes, with a Light/Dark console switch that is remembered.
