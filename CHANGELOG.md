@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 2.0.2 (2026-10-29)
+- Learn shows clear feedback while a quest runs: a Working banner with a spinner, the current step and elapsed seconds, a Sent to model line, and a hint to press Stop if the provider is slow
+
 ## 2.0.1 (2026-10-29)
 - API keys no longer disappear between quests: a key is kept for the tab (sessionStorage), shared by Learn and Build, and survives reloads. Closing the tab forgets it. Opt-in Remember on this device, plus Forget my keys.
 

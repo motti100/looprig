@@ -2,7 +2,7 @@
  * coder-data-analyst
  * Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
  *
- * Built with Looprig v2.0.1. Run it:
+ * Built with Looprig v2.0.2. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"

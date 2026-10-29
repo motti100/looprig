@@ -2,7 +2,7 @@
  * goal-research-brief
  * Reason: plan first | Act: read_file, write_file, run_python | Observe: log | Decide: stop when done | Shape: goal mode
  *
- * Built with Looprig v2.0.1. Run it:
+ * Built with Looprig v2.0.2. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"

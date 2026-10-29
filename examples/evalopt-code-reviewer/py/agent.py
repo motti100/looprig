@@ -1,7 +1,7 @@
 """evalopt-code-reviewer
 Reason: direct | Act: read_file | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with Looprig v2.0.1. Run it:
+Built with Looprig v2.0.2. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
