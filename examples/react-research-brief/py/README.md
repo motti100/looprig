@@ -2,7 +2,7 @@
 
 Reason: ReAct | Act: web_search, fetch_url | Observe: raw | Decide: stop when done | Shape: single agent
 
-Built with [LoopRig](.) v3.1.1. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [LoopRig](.) v3.3.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 

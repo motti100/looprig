@@ -2,6 +2,15 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.3.0 (2026-10-29)
+- Playground redesign: Connect and Give it a job cards, a clear Run bar, and a self-contained agent console.
+- The console keeps its own colors in light and dark themes, with a Light/Dark console switch that is remembered.
+
+## 3.2.0 (2026-10-29)
+- A What's new panel in every header, with a dot when the version changed since you last looked.
+- More breathing room: bigger card padding, clearer gaps between labels, fields and text across Learn, Lab and the builder.
+- Fixed: the Evals model field no longer stretches.
+
 ## 3.1.1 (2026-10-29)
 - The name is now written LoopRig everywhere (code, addresses and file names stay lowercase).
 
