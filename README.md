@@ -1,4 +1,4 @@
-# Looprig v1.12.5
+# Looprig v1.13.0
 
 Build any AI agent from four moves: Reason, Act, Observe, Decide. Pick a technique (ReAct, chain or tree of thought, self-consistency, agentic RAG, Reflexion, routers, supervisor teams, goal loops) or tune each move, then copy working Python or TypeScript.
 

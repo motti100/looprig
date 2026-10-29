@@ -2,6 +2,10 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.13.0 (2026-10-29)
+- Keep improving a project: describe a change and Refine edits the files you already have, with quick suggestions
+- The project is remembered on this device across reloads; attaching an existing file makes it a project; Clear project and Restore the previous files
+
 ## 1.12.5 (2026-10-29)
 - Goal loop now asks for real file changes each round, nudges after an idle round, and stops with a clear message after three idle rounds (browser, Python and TypeScript)
 - Tip shown when a small model is picked for a project-building agent
