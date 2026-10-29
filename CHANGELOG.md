@@ -2,6 +2,15 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.12.3 (2026-10-29)
+- Playground: tool schemas no longer send an empty required list (Gemini rejects it, which showed as a network error); when a call fails in the browser, a small test request now tells unreachable apart from refused
+
+## 1.12.2 (2026-10-29)
+- Quests can be ticked by hand: click the circle, or use Mark as done in the lesson panel
+
+## 1.12.1 (2026-10-29)
+- Quests in the list are clickable: pick any quest to read its lesson and jump to it
+
 ## 1.12.0 (2026-10-29)
 - Simple mode is now the default: pick a plain-language starter, try it, get code. Advanced keeps every control
 - New short, readable agent (about a hundred lines on the official Claude and OpenAI SDKs), tested against the real SDKs, in Python and TypeScript

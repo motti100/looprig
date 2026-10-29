@@ -1,7 +1,7 @@
 """chain-meeting-follow-up
 Reason: direct | Act: no tools | Observe: raw | Decide: stop when done | Shape: prompt chain
 
-Built with Looprig v1.12.0. Run it:
+Built with Looprig v1.12.3. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
