@@ -1,12 +1,16 @@
-# Looprig v2.3.0
+# Looprig v3.0.0
 
 Build any AI agent from four moves: Reason, Act, Observe, Decide. Pick a technique (ReAct, chain or tree of thought, self-consistency, agentic RAG, Reflexion, routers, supervisor teams, goal loops) or tune each move, then copy working Python or TypeScript.
 
-Works with OpenAI, Gemini, Claude, Groq, Mistral, DeepSeek, xAI, Together, OpenRouter, Ollama, LM Studio and any OpenAI-compatible endpoint.
+Works with Claude, OpenAI, Gemini, Groq, Mistral, DeepSeek, xAI, Together, OpenRouter, Fireworks, NVIDIA, Hugging Face, Ollama, LM Studio and any OpenAI-compatible endpoint, including Azure OpenAI (choose Custom: base URL `https://YOUR-RESOURCE.openai.azure.com/openai/v1/`, and use your deployment name as the model).
 
 ## Two doors
 
-**Learn** is a guided path of short quests (17 so far, in four worlds) from a first model call to agents that use tools, read files and remember. Every quest has a demo that needs no key. **Build** is the full builder for people who already know their way around.
+**Learn** is a guided path of 37 short quests in nine worlds: a first model call, tools, the loop, grounding and memory, thinking techniques, workflows, teams, safety (approvals, budgets, prompt injection) and shipping real code. Every quest has a demo that needs no key, and a step-by-step animation of what the model and your code say to each other. **Build** is the full builder for people who already know their way around.
+
+## The Lab
+
+Compare models side by side, run evals, copy a run as a share link that replays in any browser (the steps travel in the link, nothing is uploaded), set up a local model with Ollama, browse example agents, earn badges and a self-issued certificate, and back up your progress (API keys are never included).
 
 ## Use it
 

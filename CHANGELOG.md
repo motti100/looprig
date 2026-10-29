@@ -2,6 +2,16 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.0.0 (2026-10-29)
+- Learn grows from 17 to 37 quests in nine worlds: Think Better (plan, reflect, evaluate, grounding), Workflows (chain, router, parallel), Teams (orchestrator, supervisor, voting), Safe and Controlled (approvals, token budgets, prompt injection) and Ship It (write your own tool, export code, evals).
+- Quests can turn techniques on and off, show a live call/token/time meter, ask you to approve or decline tool calls with buttons, keep a history of your prompts with a word-by-word diff, and let you write a tool in JavaScript.
+- The step player now shows technique steps (plan, vote, reflect, route, team and more).
+- New Lab: compare up to three models side by side, run evals with pass rules, share a run as a link that replays in any browser (nothing is uploaded), a guided Ollama local-model setup with detection, an example gallery, badges and a certificate image, and backup and restore (never includes API keys).
+- Fixed: local model names that are not in the built-in list now work in Learn.
+
+## 2.4.0 (2026-10-29)
+- New providers: Fireworks AI, NVIDIA (NIM) and Hugging Face, each with the right endpoint, key variable and example models in the browser engine and in the generated Python and TypeScript. README explains Azure OpenAI through Custom.
+
 ## 2.3.0 (2026-10-29)
 - Learn: a Watch it happen player in every quest. A ring lights Reason, Act, Observe and Decide, and a message bubble travels between You, the model and your code with a plain-language caption for each step. Play, pause, step back and forward, replay at three speeds. It follows a live run and works for every demo.
 

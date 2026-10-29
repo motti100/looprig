@@ -25,6 +25,12 @@ Looprig is a single static page. It has no server, no accounts and no analytics.
 - A browser extension or malware on your computer can read anything in a page.
 - Generated agents are a starting point. Read the code before you give an agent tools that write files, run code or reach the web.
 
+## Sharing and backups
+
+- A **share link** stores the steps of a run inside the link itself (after the `#`, so it is never sent to a server). Anyone with the link can read those steps. Do not share runs that contain private text. Your API key is never part of a link.
+- A **backup file** holds your progress and saved settings. It never holds API keys.
+- The **tool builder** quest runs your JavaScript in the same sandbox as the Playground: a worker with no network, stopped after 10 seconds.
+
 ## Keeping the project safe
 
 - Turn on two-factor authentication for the GitHub account that owns the repository. Whoever controls the repo controls what visitors run.
