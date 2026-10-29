@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 1.12.4 (2026-10-29)
+- Playground errors now say where it broke: no connection at all, a blocked response (usually a browser extension or VPN), or a request the provider refused
+
 ## 1.12.3 (2026-10-29)
 - Playground: tool schemas no longer send an empty required list (Gemini rejects it, which showed as a network error); when a call fails in the browser, a small test request now tells unreachable apart from refused
 

@@ -2,7 +2,7 @@
  * evalopt-code-reviewer
  * Reason: direct | Act: read_file | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
  *
- * Built with Looprig v1.12.3. Run it:
+ * Built with Looprig v1.12.4. Run it:
  *   npm i @anthropic-ai/sdk && npm i -D tsx typescript @types/node
  *   export ANTHROPIC_API_KEY=...
  *   npx tsx agent.ts "your task here"
