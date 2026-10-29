@@ -2,7 +2,7 @@
 
 Reason: direct | Act: read_file | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with [LoopRig](.) v3.3.1. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [LoopRig](.) v3.4.1. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -21,6 +21,7 @@ Give it files or pictures: `npx tsx agent.ts "your task" --file notes.txt --imag
 - `smoke_test.py`: checks that your provider keys can do tool calling.
 - `TROUBLESHOOTING.md`: what each error means and how to fix it. Start with `npx tsx agent.ts --doctor`.
 - `blueprint.json`: load it back into LoopRig to change the design.
+- `AGENTS.md`: short notes for coding agents and teammates (how to run, layout, conventions).
 - `server.ts`, `Dockerfile`, `.env.example`, `package.json`: run it as an HTTP service.
 
 ## Before you rely on it

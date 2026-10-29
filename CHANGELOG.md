@@ -2,6 +2,17 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.4.1 (2026-10-29)
+- Fixed builder runs that kept stopping: replies cut off by the output limit are now detected, and file-writing runs ask for room for whole files (8192 tokens).
+- The agent can no longer finish while the page links to a file that does not exist (like game.js), and the preview names missing files.
+- Blocked fonts and other external resources in the preview are now a note, not a JavaScript error.
+
+## 3.4.0 (2026-10-29)
+- New: Skills. Turn on Skills (SKILL.md) in the Act tab to give your agent instruction packs it loads only when a task needs them. Works in the Playground and in the generated Python and TypeScript.
+- Write skills in the editor, add starters, or import any SKILL.md. See token savings and writing tips, and download skills as a .zip.
+- Every downloaded bundle now includes an AGENTS.md for coding agents, plus a skills/ folder when Skills is on.
+- New quest in Think Better: Skills, instructions on demand. Learn now has 38 quests.
+
 ## 3.3.1 (2026-10-29)
 - Fixed: the Playground preview now always shows the latest version of your page after a Refine, even if the agent forgot to preview it.
 

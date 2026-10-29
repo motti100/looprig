@@ -55,6 +55,7 @@
     "docsDir": "docs",
     "topK": 4,
     "mcp": "",
+    "skills": "---\nname: commit-message\ndescription: Use when writing a git commit message or describing a code change.\n---\n# Commit messages\n\n1. First line: type(scope): summary. Types: feat, fix, docs, refactor, test, chore.\n2. Imperative mood (\"fix\", not \"fixed\"). Maximum 50 characters. No period.\n3. If more detail helps, leave a blank line, then explain why the change was made.\n\n---\nname: meeting-notes\ndescription: Use when turning a transcript or rough notes into meeting notes.\n---\n# Meeting notes\n\nWrite three sections:\n- **Decisions**: what was agreed, one line each.\n- **Action items**: owner, task, due date.\n- **Open questions**: anything unresolved.\nSkip small talk. Keep it under 150 words.",
     "routes": "billing | Invoices, charges, refunds and payment problems\ntechnical | Bugs, errors, setup and how-to questions\ngeneral | Anything else, including account questions",
     "steps": "Extract | Pull out the key facts, names, dates and numbers | Output contains concrete facts, no opinions\nAnalyze | Identify patterns, risks and open questions from the facts\nWrite | Write a clear, structured summary for a busy reader",
     "workerMode": "sectioning",
@@ -68,5 +69,5 @@
   "preset": "goal",
   "format": "looprig-blueprint",
   "version": 1,
-  "looprigVersion": "3.3.1"
+  "looprigVersion": "3.4.1"
 }
