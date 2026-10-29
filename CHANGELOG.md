@@ -2,6 +2,9 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 2.0.3 (2026-10-29)
+- The version number is shown on the home screen and in Learn again, not only in the builder
+
 ## 2.0.2 (2026-10-29)
 - Learn shows clear feedback while a quest runs: a Working banner with a spinner, the current step and elapsed seconds, a Sent to model line, and a hint to press Stop if the provider is slow
 
