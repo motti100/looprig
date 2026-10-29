@@ -2,6 +2,10 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 2.0.0 (2026-10-29)
+- Learn door: a home screen with Learn and Build, and a guided path of 17 quests in four worlds (Talk, Tools, The Loop, Ground and Remember). Each quest has a predict step, a no-key demo, a break-it option and an automatic check. Worlds unlock in order or by taking the boss challenge. The old quest panel is replaced by Learn.
+- Now released into the public domain (the Unlicense).
+
 ## 1.13.2 (2026-10-29)
 - Agents that reply with nothing are nudged to continue (up to twice) instead of silently ending the turn, and the Playground log now shows what the model said or that its reply was empty
 

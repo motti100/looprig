@@ -66,5 +66,5 @@
   "preset": "evalopt",
   "format": "looprig-blueprint",
   "version": 1,
-  "looprigVersion": "1.13.2"
+  "looprigVersion": "2.0.0"
 }
