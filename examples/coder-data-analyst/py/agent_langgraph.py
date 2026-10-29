@@ -1,8 +1,8 @@
 """coder-data-analyst (LangGraph version)
 Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Exported by Looprig. This keeps your model, system prompt, tools, approval setting and turn limit,
-and hands the loop itself to LangGraph. Looprig-only techniques (tree of thoughts, reflection,
+Exported by LoopRig. This keeps your model, system prompt, tools, approval setting and turn limit,
+and hands the loop itself to LangGraph. LoopRig-only techniques (tree of thoughts, reflection,
 team shapes, MCP, structured output) are not carried over: use the main agent file for those.
 
   pip install langchain langgraph langchain-anthropic

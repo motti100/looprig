@@ -2,7 +2,7 @@
 
 Reason: ReAct | Act: web_search, fetch_url | Observe: raw | Decide: stop when done | Shape: single agent
 
-Built with [Looprig](.) v3.0.0. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
+Built with [LoopRig](.) v3.1.1. Provider: Anthropic (Claude), model `claude-sonnet-5-5`.
 
 ## Run it
 
@@ -20,7 +20,7 @@ Give it files or pictures: `npx tsx agent.ts "your task" --file notes.txt --imag
 - `evals.ts`: a small regression suite. Add cases as you find failures.
 - `smoke_test.py`: checks that your provider keys can do tool calling.
 - `TROUBLESHOOTING.md`: what each error means and how to fix it. Start with `npx tsx agent.ts --doctor`.
-- `blueprint.json`: load it back into Looprig to change the design.
+- `blueprint.json`: load it back into LoopRig to change the design.
 - `server.ts`, `Dockerfile`, `.env.example`, `package.json`: run it as an HTTP service.
 
 ## Before you rely on it

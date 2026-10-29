@@ -1,8 +1,8 @@
 """coder-data-analyst (OpenAI Agents SDK version)
 Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Exported by Looprig. This keeps your model, system prompt, tools, approval setting and turn limit,
-and hands the loop itself to the OpenAI Agents SDK. Looprig-only techniques (tree of thoughts,
+Exported by LoopRig. This keeps your model, system prompt, tools, approval setting and turn limit,
+and hands the loop itself to the OpenAI Agents SDK. LoopRig-only techniques (tree of thoughts,
 reflection, team shapes, MCP, structured output) are not carried over: use the main agent file for those.
 
   pip install "openai-agents[litellm]"

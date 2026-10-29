@@ -66,5 +66,5 @@
   "preset": "rag",
   "format": "looprig-blueprint",
   "version": 1,
-  "looprigVersion": "3.0.0"
+  "looprigVersion": "3.1.1"
 }

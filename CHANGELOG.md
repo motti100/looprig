@@ -2,6 +2,13 @@
 
 Looprig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.1.1 (2026-10-29)
+- The name is now written LoopRig everywhere (code, addresses and file names stay lowercase).
+
+## 3.1.0 (2026-10-29)
+- New look: aurora background, glass panels, glowing gradient buttons, animated logo, cursor spotlight on cards, a control-room style step player, per-world progress bars, refined light and dark themes. Respects reduced-motion.
+- Fixed: the Learn map said four worlds; Lab badge styles no longer clash with the version pill.
+
 ## 3.0.0 (2026-10-29)
 - Learn grows from 17 to 37 quests in nine worlds: Think Better (plan, reflect, evaluate, grounding), Workflows (chain, router, parallel), Teams (orchestrator, supervisor, voting), Safe and Controlled (approvals, token budgets, prompt injection) and Ship It (write your own tool, export code, evals).
 - Quests can turn techniques on and off, show a live call/token/time meter, ask you to approve or decline tool calls with buttons, keep a history of your prompts with a word-by-word diff, and let you write a tool in JavaScript.

@@ -1,6 +1,6 @@
 # Security
 
-Looprig is a single static page. It has no server, no accounts and no analytics.
+LoopRig is a single static page. It has no server, no accounts and no analytics.
 
 ## How your API key is handled
 
