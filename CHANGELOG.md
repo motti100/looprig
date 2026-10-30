@@ -2,6 +2,9 @@
 
 LoopRig uses semantic versions: a new major number for breaking changes to blueprints, a minor number for new features, a patch number for fixes.
 
+## 3.6.7
+- Lab: Compare models fills Ollama columns with the models you actually have installed
+
 ## 3.6.6
 - What's new now shows the latest eight versions, with a button to show every older version
 

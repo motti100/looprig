@@ -68,5 +68,5 @@
   "preset": "react",
   "format": "looprig-blueprint",
   "version": 1,
-  "looprigVersion": "3.6.6"
+  "looprigVersion": "3.6.7"
 }

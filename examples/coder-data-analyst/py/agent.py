@@ -1,7 +1,7 @@
 """coder-data-analyst
 Reason: plan first | Act: calculator, read_file, run_python | Observe: raw | Decide: evaluate >= 8 | Shape: single agent
 
-Built with LoopRig v3.6.6. Run it:
+Built with LoopRig v3.6.7. Run it:
 
     pip install anthropic
     export ANTHROPIC_API_KEY=...
